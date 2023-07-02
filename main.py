@@ -23,7 +23,7 @@ data2_Orininal_year = data2.iloc[:, 0]
 data1.drop(' ', axis=1, inplace=True)
 data2.drop(' ', axis=1, inplace=True)
 figure_show_year = []
-for i in range(0, len(data1_Orininal_year), 12):
+for i in range(0, len(data1_Orininal_year), 3):
     figure_show_year.append(data1_Orininal_year[i])
 #data re-organize
 for i in range(len(col)):
@@ -51,10 +51,10 @@ target_data2_without_one_ele = data2['總指數(不含土石採取業)']
 data1.drop(['總指數', '總指數(不含土石採取業)'], axis=1, inplace=True)
 data2.drop(['總指數', '總指數(不含土石採取業)'],axis=1, inplace=True)
 # print(data1.head(10))
-# print(data2.head(10))
+print(data2.head(10))
 
 
-x = range(0, len(data1_Orininal_year), 12)
+x = range(0, len(data1_Orininal_year), 3)
 labels = figure_show_year
 
 
@@ -68,7 +68,7 @@ for i in range(len(col)):
     plt.xticks(ticks=x,
           labels=labels,
           color='#08395c',
-          fontsize=15,
+          fontsize=5,
           rotation=70)
 
     #draw figure
@@ -89,7 +89,7 @@ for i in range(len(col)):
     plt.xticks(ticks=x,
           labels=labels,
           color='#9c5307',
-          fontsize=15,
+          fontsize=5,
           rotation=70)
 
     #draw figure
