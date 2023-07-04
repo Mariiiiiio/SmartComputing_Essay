@@ -1,5 +1,10 @@
 from sklearn.svm import SVR
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import r2_score
+import matplotlib.pyplot as plt
+import numpy as np
 import sys  
+
 sys.path.append('/Users/mariio/專題/論文專題/AI_model') 
 
 from data_process import data_col
@@ -9,7 +14,7 @@ if __name__ == '__main__':
 
 
     # Data loading
-    data1, data2, data3, data4, data5, data6 = data_col()
+    data1, data2, data1_1, data2_2, data3, data4, data5, data6 = data_col()
     '''
     data1 : 原始值-變數
     data2 : 年增率-變數
@@ -22,12 +27,49 @@ if __name__ == '__main__':
     '''
 
     #Data Re-Organize
-    print(data2)
-    print(data3)
+    # print(data2)
+    # print(data3)
+    
+    # 原始值-變數-轉換矩陣型態
+    data1_ar = np.array(data1)
+    data1_1ar = np.array(data1_1)
+    # print(data1_1ar)
 
+    # 年增率-變數-轉換矩陣型態
+    data2_ar = np.array(data2)
+    data2_2ar = np.array(data2_2)
+    # print(data2_2ar)
+
+    #Target-setting-To array
+    target_ori = np.array(data5)
+    target_Year = np.array(data6)
+
+    # print(data1.shape) 
+    # print(data1_1ar.shape) 
+    # print(data2_ar.shape) 
+    # print(data2_2ar.shape) 
+    # print(target_ori.shape) 
+    # print(target_Year.shape) 
+
+    #Data prepare
+    x_train, x_test, y_train, y_test = train_test_split(data1_1ar, target_ori, test_size=0.2)
+    # print(x_train.shape)
+    # print(y_train.shape)
     #SVR model create
+    print('-'*50+'SVR Started--')
+    polyModel=SVR(C=3, kernel='poly', degree=2, gamma='auto')
+    polyModel.fit(x_train, y_train)
+    y_hat=polyModel.predict(x_test)
+    print(y_hat)
+    # print("得分:", r2_score(y_test, y_hat))
+    # print(y_test)
 
-    # polyModel=SVR(C=6, kernel='poly', degree=3, gamma='auto')
+    # r = len(x_test) + 1
+    # plt.plot(np.arange(1,r), y_hat, 'go-', label="predict")
+    # plt.plot(np.arange(1,r), y_test, 'co-', label="real")
+    # plt.legend()
+    # plt.show()
+
 
 
 

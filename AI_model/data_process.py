@@ -43,9 +43,12 @@ def data_col():
     #target set : train value -> data except year and 總指數
     data1.drop(['總指數', '總指數(不含土石採取業)'], axis=1, inplace=True)
     data2.drop(['總指數', '總指數(不含土石採取業)'],axis=1, inplace=True)
+    data1_1 = data1.drop('礦業及土石採取業', axis=1)
+    data2_2 = data2.drop('礦業及土石採取業', axis=1)
+    # print(data1_1)
     # print(data1.head(10))
     # print(data2.head(10))
-    return data1, data2, target_data1, target_data2, target_data1_without_one_ele, target_data2_without_one_ele
+    return data1, data2, data1_1, data2_2, target_data1, target_data2, target_data1_without_one_ele, target_data2_without_one_ele
     '''
     data1 : 原始值-變數
     data2 : 年增率-變數
