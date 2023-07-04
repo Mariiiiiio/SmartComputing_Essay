@@ -57,7 +57,7 @@ print(data2.head(10))
 x = range(0, len(data1_Orininal_year), 3)
 labels = figure_show_year
 
-
+'''
 # Original value figure
 for i in range(len(col)):
     
@@ -77,8 +77,41 @@ for i in range(len(col)):
     plt.ylim(0,300, 10) 
     plt.grid(True)
     plt.show()  
+'''
 
+# 總指數（原始值）
+plt.title(f'總指數 原始值', fontsize = 20)
+plt.xlabel('Years', fontsize = 15)
+plt.ylabel('數值', fontsize= 15)
+plt.xticks(ticks=x,
+        labels=labels,
+        color='#08395c',
+        fontsize=5,
+        rotation=70)
+#draw figure
+plt.plot(range(497),target_data1)
+# plt.plot(x, data1[col[i]], 'r:o')
+plt.ylim(0,300, 10) 
+plt.grid(True)
+plt.show()  
 
+# 總指數（不包含土石採取業）（原始值）
+plt.title(f'總指數（不包含土石採取業） 原始值', fontsize = 20)
+plt.xlabel('Years', fontsize = 15)
+plt.ylabel('數值', fontsize= 15)
+plt.xticks(ticks=x,
+        labels=labels,
+        color='#08395c',
+        fontsize=5,
+        rotation=70)
+#draw figure
+plt.plot(range(497),target_data1_without_one_ele)
+# plt.plot(x, data1[col[i]], 'r:o')
+plt.ylim(0,300, 10) 
+plt.grid(True)
+plt.show()  
+
+'''
 # Years rate figure
 for i in range(len(col)):
 
@@ -97,4 +130,35 @@ for i in range(len(col)):
     plt.ylim(-60, 200, 10) 
     plt.grid(True)
     plt.show()  
+'''
+# 總指數 (年增率)
+plt.title(f'總指數 年增率', fontsize = 20)
+plt.xlabel('Years', fontsize = 15)
+plt.ylabel('數值', fontsize= 15)
+plt.xticks(ticks=x,
+        labels=labels,
+        color='#08395c',
+        fontsize=5,
+        rotation=70)
+#draw figure
+plt.plot(range(497),target_data2)
+# plt.plot(x, data1[col[i]], 'r:o')
+plt.ylim(-60, 200, 10) 
+plt.grid(True)
+plt.show()  
 
+# 總指數（不包含土石採取業） (年增率)
+plt.title(f'總指數 （不包含土石採取業年增率)', fontsize = 20)
+plt.xlabel('Years', fontsize = 15)
+plt.ylabel('數值', fontsize= 15)
+plt.xticks(ticks=x,
+        labels=labels,
+        color='#08395c',
+        fontsize=5,
+        rotation=70)
+#draw figure
+plt.plot(range(497),target_data2_without_one_ele)
+# plt.plot(x, data1[col[i]], 'r:o')
+plt.ylim(-60, 200, 10) 
+plt.grid(True)
+plt.show()  
