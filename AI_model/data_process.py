@@ -5,8 +5,8 @@ def data_col():
     #data1 = pd.read_csv('/Users/mariio/專題/論文專題/OriginalValue.csv', encoding='cp950')
     #data2 = pd.read_csv('/Users/mariio/專題/論文專題/YearsRate.csv', encoding='cp950')
 
-    data1 = pd.read_csv('/Users/mariio/專題/論文專題/OriginalValue.csv', encoding='cp950')
-    data2 = pd.read_csv('/Users/mariio/專題/論文專題/YearsRate.csv', encoding='cp950')
+    data1 = pd.read_csv('..\OriginalValue.csv',encoding='cp950')
+    data2 = pd.read_csv('..\YearsRate.csv',encoding='cp950')
 
     col = ['礦業及土石採取業', '製造業', '金屬機電工業', '資訊電子工業',
         '化學工業', '民生工業', '電力及燃氣供應業', '用水供應業']
@@ -43,8 +43,8 @@ def data_col():
     # print(target_data2_without_one_ele.head(10))
 
     #target set : train value -> data except year and 總指數
-    data1.drop(['總指數', '總指數(不含土石採取業)'], axis=1, inplace=True)
-    data2.drop(['總指數', '總指數(不含土石採取業)'],axis=1, inplace=True)
+    data1.drop(['總指數', '總指數(不含土石採取業)', '製造業'], axis=1, inplace=True)
+    data2.drop(['總指數', '總指數(不含土石採取業)', '製造業'],axis=1, inplace=True)
     data1_1 = data1.drop('礦業及土石採取業', axis=1)
     data2_2 = data2.drop('礦業及土石採取業', axis=1)
     # print(data1_1)

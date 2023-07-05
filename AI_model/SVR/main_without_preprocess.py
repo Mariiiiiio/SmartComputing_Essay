@@ -8,19 +8,14 @@ import numpy as np
 import time
 import sys  
 
+
 # sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
 
 sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
 
 from data_process import data_col
 
-
-if __name__ == '__main__':
-
-    start = time.time()
-    # Data loading
-    data1, data2, data1_1, data2_2, data3, data4, data5, data6 = data_col()
-    '''
+''' Documents : 
     data1 : 原始值-變數
     data2 : 年增率-變數
     data1_1 : 原始值(不包含礦業與土石採取業)-變數
@@ -29,7 +24,19 @@ if __name__ == '__main__':
     data4 : 年增率-目標
     data5 : 原始值（不包含礦業與土石採取業) -目標
     data6 : 年增率（不包含礦業與土石採取業) -目標
-    '''
+'''
+
+
+
+
+
+
+if __name__ == '__main__':
+
+    start = time.time()
+    # Data loading
+    data1, data2, data1_1, data2_2, data3, data4, data5, data6 = data_col()
+
 
     #Data Re-Organize
     # print(data2)
@@ -67,15 +74,22 @@ if __name__ == '__main__':
     polyModel.fit(x_train, y_train)
     y_hat=polyModel.predict(x_test)
     '''
+    
+    
     #for finding the svr best score
     score_con_train = []
     score_con_test = []
-    for i in range(1, 29):
-        print('-'*50+'SVR'+str(i)+'Started--')
+    best_mse = 20
+    count_i = 0
+    mes_val = []
+    R2_score = []
+    for i in range(2, 50):
+        print('-'*50+'SVR'+'_'+str(i)+' '+'Started')
         # for j in range(1, 7):
-        polyModel=SVR(C=i, kernel='rbf', degree= 7, gamma='auto', max_iter=-1, verbose=2)
+        polyModel=SVR(C=i, kernel='rbf', degree= 3, gamma='auto', max_iter=-1)
         polyModel.fit(x_train, y_train)
-        y_hat=polyModel.predict(x_test)        
+        y_hat=polyModel.predict(x_test)      
+          
         #Score showing
         print("Training  Score : ", polyModel.score(x_train,y_train))
         print("Testing  Score : ", polyModel.score(x_test, y_test))
@@ -83,10 +97,21 @@ if __name__ == '__main__':
         mse_score = mse(y_test, y_hat)
         print("MSE_Score : ", mse_score)
         print("RMSE_Score : ", np.sqrt(mse_score))
+        if mse_score < best_mse:
+            best_mse = mse_score
+            count_i = i
         score_con_train.append(polyModel.score(x_train,y_train))
         score_con_test.append(polyModel.score(x_test, y_test))
-    
-    r = len(x_test) + 1
+        mes_val.append(mse_score)
+        R2_score.append(r2_score(y_test, y_hat))
+        
+    print('Score :')
+    print('-'*50)
+    print(f'The best C and best mse value : C = {count_i}, {best_mse}')
+    print(f'R2 score : {R2_score}')
+    print(f'Mse score : {mse_score}')
+    print('-'*50)
+    #draw score
     plt.plot(range(len(score_con_test)), score_con_test, 'go-', label="Test Score")
     plt.plot(range(len(score_con_test)), score_con_train, 'co-', label="Train Score")
     plt.legend()
@@ -94,7 +119,21 @@ if __name__ == '__main__':
     print("執行時間：%f 秒" % (end - start))
     plt.show()
     
+    #draw score_lossfunction & r2
+    plt.plot(range(len(mes_val)), mes_val, 'go-', label="Mse Score")
+    plt.plot(range(len(R2_score)), R2_score, 'co-', label="R2 Score")
+    plt.legend()
+    plt.show()
+    
+    #draw prediction figure
+    r = len(x_test) + 1
+    plt.plot(np.arange(1,r), y_hat, 'go-', label="predict")
+    plt.plot(np.arange(1,r), y_test, 'co-', label="real")
+    plt.legend()
+    plt.show()
+    
     '''
+    
     #GridSearch
     param = {'kernel' : ('rbf', 'sigmoid'),'C' : range(1, 29),'degree' : [3,8],'gamma' : ('auto','scale')}
 
@@ -125,8 +164,8 @@ if __name__ == '__main__':
     end = time.time()
     print("執行時間：%f 秒" % (end - start))
     plt.show()
-    
     '''
+    
 
 
 
