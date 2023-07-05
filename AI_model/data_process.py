@@ -2,8 +2,8 @@ import pandas as pd
 import numpy as np
 
 def data_col():
-    data1 = pd.read_csv('OriginalValue.csv', encoding='cp950')
-    data2 = pd.read_csv('YearsRate.csv', encoding='cp950')
+    data1 = pd.read_csv('/Users/mariio/專題/論文專題/OriginalValue.csv', encoding='cp950')
+    data2 = pd.read_csv('/Users/mariio/專題/論文專題/YearsRate.csv', encoding='cp950')
 
 
     col = ['礦業及土石採取業', '製造業', '金屬機電工業', '資訊電子工業',

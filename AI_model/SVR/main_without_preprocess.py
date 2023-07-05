@@ -7,9 +7,9 @@ import numpy as np
 import time
 import sys  
 
-# sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
+sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
 
-sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
+# sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
 
 from data_process import data_col
 
@@ -62,16 +62,20 @@ if __name__ == '__main__':
     # print(y_train.shape)
     #SVR model create
     print('-'*50+'SVR Started--')
-    polyModel=SVR(C=6, kernel='poly', gamma='auto', max_iter=-1, verbose=0)
+    polyModel=SVR(C=6, kernel='rbf', degree= 7, gamma='auto', max_iter=-1, verbose=0)
     polyModel.fit(x_train, y_train)
     y_hat=polyModel.predict(x_test)
-    # print(y_hat)
-    print("得分:", r2_score(y_test, y_hat))
-    # print(y_test)
+
+    #Score showing
+    print("Training  Score : ", polyModel.score(x_train,y_train))
+    print("Testing  Score : ", polyModel.score(x_test, y_test))
+
+    print("R^2 得分:", r2_score(y_test, y_hat))
     mse_score = mse(y_test, y_hat)
     print("MSE_Score : ", mse_score)
     print("RMSE_Score : ", np.sqrt(mse_score))
     
+    #Draw the result graph
     r = len(x_test) + 1
     plt.plot(np.arange(1,r), y_hat, 'go-', label="predict")
     plt.plot(np.arange(1,r), y_test, 'co-', label="real")
