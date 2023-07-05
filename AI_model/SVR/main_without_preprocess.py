@@ -1,4 +1,5 @@
 from sklearn.svm import SVR
+# from thundersvm import SVR
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_absolute_error as mse
@@ -66,12 +67,39 @@ if __name__ == '__main__':
     polyModel.fit(x_train, y_train)
     y_hat=polyModel.predict(x_test)
     '''
-
+    #for finding the svr best score
+    score_con_train = []
+    score_con_test = []
+    for i in range(1, 29):
+        print('-'*50+'SVR'+str(i)+'Started--')
+        # for j in range(1, 7):
+        polyModel=SVR(C=i, kernel='rbf', degree= 7, gamma='auto', max_iter=-1, verbose=2)
+        polyModel.fit(x_train, y_train)
+        y_hat=polyModel.predict(x_test)        
+        #Score showing
+        print("Training  Score : ", polyModel.score(x_train,y_train))
+        print("Testing  Score : ", polyModel.score(x_test, y_test))
+        print("R^2 得分:", r2_score(y_test, y_hat))
+        mse_score = mse(y_test, y_hat)
+        print("MSE_Score : ", mse_score)
+        print("RMSE_Score : ", np.sqrt(mse_score))
+        score_con_train.append(polyModel.score(x_train,y_train))
+        score_con_test.append(polyModel.score(x_test, y_test))
+    
+    r = len(x_test) + 1
+    plt.plot(range(len(score_con_test)), score_con_test, 'go-', label="Test Score")
+    plt.plot(range(len(score_con_test)), score_con_train, 'co-', label="Train Score")
+    plt.legend()
+    end = time.time()
+    print("執行時間：%f 秒" % (end - start))
+    plt.show()
+    
+    '''
     #GridSearch
-    param = {'kernel' : ('linear', 'poly', 'rbf', 'sigmoid'),'C' : [2,3,4,5,6,7,20,21,22,23,24,25,26,27,28,29],'degree' : [3,8],'gamma' : ('auto','scale')}
+    param = {'kernel' : ('rbf', 'sigmoid'),'C' : range(1, 29),'degree' : [3,8],'gamma' : ('auto','scale')}
 
     grid_search = GridSearchCV(estimator = SVR(), param_grid = param, 
-                      cv = 3, n_jobs = -1, verbose = 2)
+                      cv = 3, n_jobs = -1, verbose = 2 )
     grid_search.fit(x_train, y_train)
     y_hat = grid_search.predict(x_test)
 
@@ -98,6 +126,7 @@ if __name__ == '__main__':
     print("執行時間：%f 秒" % (end - start))
     plt.show()
     
+    '''
 
 
 
