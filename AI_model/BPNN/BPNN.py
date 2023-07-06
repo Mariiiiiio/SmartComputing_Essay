@@ -3,10 +3,11 @@ import numpy as np
 import time
 import sys  
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_error as mse
 import pandas as pd
-sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
+# sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
 
-# sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
+sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
 
 from data_process import data_col
 
@@ -37,7 +38,7 @@ def mean_squared_error(y_pred, y_true):
     return error
 
 def accuracy(y_pred, y_true):
-    acc = y_pred.argmax(axis=1) ==  y_true.argmax(axis=1)
+    acc = y_pred.argmax(axis=1) == y_true.argmax(axis=1)
     return acc.mean()
 
 
@@ -61,9 +62,10 @@ if __name__ == '__main__':
     #Target-setting-To array
     target_ori = np.array(data5)
     target_Year = np.array(data6)
-    
-    #Data prepare
-    X_train, X_test, y_train, y_test = train_test_split(data1_1ar, target_ori, test_size=0.2)
+    y = pd.get_dummies(data5).values
+    print(y[:3])
+    #Data prepare   
+    X_train, X_test, y_train, y_test = train_test_split(data1_1ar, y, test_size=0.2)
     print(y_train.size)
     print(X_train.size)
     print(X_train.shape[1])
@@ -73,7 +75,7 @@ if __name__ == '__main__':
     iterations = 5000
     N = y_train.size
     input_size = X_train.shape[1]
-    hidden_size = 2(input_size)
+    hidden_size = 2*(input_size)
     output_size = 1
     
     np.random.seed(10)
