@@ -9,9 +9,9 @@ import time
 import sys  
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 import pmdarima as pm
-# sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
+sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
 
-sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
+# sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
 from data_process import data_col
 
 
@@ -35,6 +35,7 @@ if __name__== "__main__":
     plt.show()
     
     from statsmodels.tsa.stattools import adfuller
+
     adf_test = adfuller(df_train)
     print(f'p-value: {adf_test[1]}')
     
@@ -53,9 +54,11 @@ if __name__== "__main__":
     
     
     forecast_test_auto = auto_arima.predict(n_periods=len(df_test))
-    df['forecast_auto'] = [None]*len(df_train) + list(forecast_test_auto)
+    print('-'*50)
+    print(forecast_test_auto)
+    df =  [None]*len(df_train) + list(forecast_test_auto)
 
-    # df.plot()
+    df.plot()
     plt.show()
     '''
     residuals = model_fit.resid[1:]
