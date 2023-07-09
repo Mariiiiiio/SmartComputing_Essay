@@ -9,7 +9,9 @@ import numpy as np
 import time
 import sys
 
-sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
+
+sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
+# sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
 from data_process import data_col
 
 
@@ -73,7 +75,7 @@ if __name__ == '__main__':
     mse_fig = []
     pca_record = {}
 
-    for i in range(1, 7):
+    for i in range(1, 3):
         
         #-----------container init
         mse_rec = 1000000
@@ -136,9 +138,10 @@ if __name__ == '__main__':
         train_sc = []
         test_sc_num = 0
         train_sc_num = 0
-        for j in range(1,50):
-            # print(f'C = {j} ..........')
-            svr_model = SVR(C= j,kernel='rbf', degree= 3, gamma='auto', max_iter=-1)
+        for j in range(49,50):
+            
+            print(f'C = {j} ..........')
+            svr_model = SVR(C= j,kernel='poly', degree= 3, gamma='auto', max_iter=-1)
             svr_model.fit(x_train, y_train)
             y_hat = svr_model.predict(x_test)
             #Score showing
@@ -156,16 +159,16 @@ if __name__ == '__main__':
                 train_sc_num = svr_model.score(x_train,y_train)
             train_sc.append(svr_model.score(x_train, y_train))
             test_sc.append(svr_model.score(x_test, y_test))
-        draw_graph(train_sc, test_sc, i)
+        # draw_graph(train_sc, test_sc, i)
         mse_fig.append(mse_rec)
         param_record[i] = {'C': j, 
-                           'best_mse_score': mse_rec, 
-                           'R2_score': r2_rec, 
-                           'Training score' : train_sc_num, 
-                           'Testing score' : test_sc_num}
-        
-    # plt.plot(range(len(train_sc)), train_sc, 'go-', label="Train Score")
-    # plt.plot(range(len(test_sc)), test_sc, 'co-', label="Test Score")
+                            'best_mse_score': mse_rec, 
+                            'R2_score': r2_rec, 
+                            'Training score' : train_sc_num, 
+                            'Testing score' : test_sc_num}
+            
+        # plt.plot(range(len(train_sc)), train_sc, 'go-', label="Train Score")
+        # plt.plot(range(len(test_sc)), test_sc, 'co-', label="Test Score")
 
 
     end = time.time()

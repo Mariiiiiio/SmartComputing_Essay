@@ -41,8 +41,10 @@ def  draw_graph(train_data, test_data , round_num):
 
 
 if __name__ == '__main__':
-
+    
     start = time.time()
+    
+    
     # Data loading
     data1, data2, data1_1, data2_2, data3, data4, data5, data6 = data_col()
     data_column = ['金屬機電工業', '資訊電子工業',
