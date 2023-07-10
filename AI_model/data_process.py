@@ -61,5 +61,35 @@ def data_col():
     '''
 
 
+def data_col_329():
+    data1 = pd.read_csv('/Users/mariio/專題/論文專題/OriginalValue(329).csv', encoding='cp950')
+
+
+    # data1 = pd.read_csv('..\OriginalValue.csv',encoding='cp950')
+    # data2 = pd.read_csv('..\YearsRate.csv',encoding='cp950')
+
+    col = ['礦業及土石採取業', '製造業', '金屬機電工業', '資訊電子工業',
+        '化學工業', '民生工業', '電力及燃氣供應業', '用水供應業']
+    target_col = ['總指數', '總指數(不含土石採取業)']
+
+    #Split the year from the data
+    data1_Orininal_year = data1.iloc[:, 0]
+    data1.drop(' ', axis=1, inplace=True)
+    print(data1.head(10))
+    data1 = data1.astype('float64')
+
+
+
+    #target set : 總指數 and 總指數(不含土石採取業)
+    target_data1 = data1.iloc[:, 0]
+    print(target_data1.head(10))
+
+    print('-'*50)
+    #target set : train value -> data except year and 總指數
+    data1.drop(['總指數', '總指數(不含土石採取業)', '製造業'], axis=1, inplace=True)
+    print(data1.head(10))
+    print(data1.columns)
+    return data1, target_data1
 if __name__ == '__main__':
+    # data_col_329()
     pass

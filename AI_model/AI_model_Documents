@@ -1,0 +1,28 @@
+'''
+>>> Kernel 訓練:
+		1. rbf : 非線性
+		2. poly : 非線性
+
+				poly 當中的degree 將會使用當rbf kernel訓練或進行PCA分析時所得出的
+				最佳特徵數量，透過挑選最佳特徵數量的方式，來決定選用poly kernel時，
+				當中的degree值。
+
+>>>PCA Result show that : 
+		When PC1 ， percentage got almost 80%, 
+		when I concat PC1 and PC2 also show the majority phenomenon. 
+
+		=> When i looking at the SVR + PCA training score,
+			 it also show that when i use choose the PCA n_comonents as 1,
+			 the result still occupy the 1th place.
+			 
+
+>>>ICA Result show that : 
+		When I set the ICA components 1 ,shows the lowest mse result
+		=> But here comes an issue that it seems overfitting 
+			 because training score or lower than testing score
+		So I going to set the ICA components as 1 ,it show the 2th place score. 
+		=> And there isn't any issue that looks like overfitting
+		... So i gonna choose ICA n components as 1 for ICA + SVR training
+
+
+'''

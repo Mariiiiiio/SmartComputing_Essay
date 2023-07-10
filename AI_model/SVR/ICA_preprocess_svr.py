@@ -14,7 +14,7 @@ sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
 
 # sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
 
-from data_process import data_col
+from data_process import data_col, data_col_329
 
 ''' Documents : 
     data1 : 原始值-變數
@@ -29,54 +29,23 @@ from data_process import data_col
 
 def  draw_graph(train_data, test_data , round_num):
 
-    plt.subplot(3, 2, round_num)
+    plt.subplot(2, 4, round_num)
     plt.title(f'ICA = {round_num}')
-    plt.plot(range(1, 70), train_data, 'co-', label = f'train data', markersize=4)
-    plt.plot(range(1, 70), test_data, 'go-', label = f'test data', markersize=4)
+    plt.plot(range(1, 50), train_data, 'co-', label = f'train data', markersize=4)
+    plt.plot(range(1, 50), test_data, 'go-', label = f'test data', markersize=4)
     plt.legend()
     plt.xlabel("C number")
     plt.ylabel("Value")
 
-
-
-
-if __name__ == '__main__':
-    
+def Call_Model(data, target):
     start = time.time()
     
-    
-    # Data loading
-    data1, data2, data1_1, data2_2, data3, data4, data5, data6 = data_col()
-    data_column = ['金屬機電工業', '資訊電子工業',
-        '化學工業', '民生工業', '電力及燃氣供應業', '用水供應業']
-
-    #Data Re-Organize
-    # print(data2)
-    # print(data3)
-    
-    # 原始值-變數-轉換矩陣型態
-    data1_ar = np.array(data1)
-    
-    # print(data1_1.head(10))
-    # data1_1ar = np.array(data1_1.drop('製造業',axis=1))
-    data1_1ar = np.array(data1_1)
-    # print(data1_1ar)
-
-    # 年增率-變數-轉換矩陣型態
-    data2_ar = np.array(data2)
-    data2_2ar = np.array(data2_2)
-    # print(data2_2ar)
-
-    #Target-setting-To array
-    target_ori = np.array(data5)
-    target_Year = np.array(data6)
+   
     
     #StandardScaler 
     from sklearn.preprocessing import StandardScaler as ss
     
-    scaled_data = ss().fit_transform(data1_1)
-
-
+    scaled_data = ss().fit_transform(data)
 
     best_mse = []
     param_record = {}
@@ -84,10 +53,10 @@ if __name__ == '__main__':
     Ica_record = {}
 
     # print(scaled_data.shape)
-    for i in range(1, 7):
+    for i in range(1, len(data.columns)+1):
         fast_ica = FastICA(n_components=i)
         S_ = fast_ica.fit(scaled_data).fit_transform(scaled_data)
-        x_train, x_test, y_train, y_test = train_test_split(S_, target_ori, test_size=0.2, random_state=0)
+        x_train, x_test, y_train, y_test = train_test_split(S_, target, test_size=0.2, random_state=1)
 
         mse_rec = 1000000
         count = 0
@@ -99,9 +68,9 @@ if __name__ == '__main__':
         train_sc = []
         test_sc_num = 0
         train_sc_num = 0
-        for j in range(1,60):
+        for j in range(1,50):
             # print(f'C = {j} ..........')
-            svr_model = SVR(C= j,kernel='rbf', degree= 3, gamma='auto', max_iter=-1)
+            svr_model = SVR(C= j,kernel='rbf', degree= i, gamma='auto', max_iter=-1)
             svr_model.fit(x_train, y_train)
             y_hat = svr_model.predict(x_test)
             #Score showing
@@ -147,10 +116,54 @@ if __name__ == '__main__':
     #--------------Model result
     print(param_record)
     plt.title('SVR + ICA ')
-    plt.plot(range(1, 7), mse_fig, 'co-', label="Train Score")
+    plt.plot(range(1, len(data.columns) + 1), mse_fig, 'co-', label="Train Score")
     plt.xlabel('ICA number')
     plt.ylabel('MSE value')
     plt.show()
+
+def Call_497data():
+    # Data loading
+    data1, data2, data1_1, data2_2, data3, data4, data5, data6 = data_col()
+    
+    data_column = ['金屬機電工業', '資訊電子工業', '化學工業', '民生工業', '電力及燃氣供應業', '用水供應業']
+
+    #------------Data Re-Organize
+    
+    # 原始值-變數-轉換矩陣型態
+    data1_ar = np.array(data1)
+    
+    # print(data1_1.head(10))
+    # data1_1ar = np.array(data1_1.drop('製造業',axis=1))
+    data1_1ar = np.array(data1_1)
+
+    # 年增率-變數-轉換矩陣型態
+    # data2_ar = np.array(data2)
+    # data2_2ar = np.array(data2_2)
+
+    #Target-setting-To array
+    target_ori = np.array(data5)
+    # target_Year = np.array(data6)
+
+    Call_Model(data1_1, target_ori)
+
+
+def Call_329data():
+    data, target = data_col_329()
+    print(f'Data number : {data.shape}, target number : {target.shape}')
+    Call_Model(data, target)
+
+
+if __name__ == '__main__':
+    Call_329data()
+    
+
+
+    Call_497data()
+
+
+
+
+    
 
 
 
