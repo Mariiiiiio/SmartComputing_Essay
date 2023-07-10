@@ -53,7 +53,8 @@ def Call_Model(data, target):
     Ica_record = {}
 
     # print(scaled_data.shape)
-    for i in range(1, len(data.columns)+1):
+    # for i in range(1, len(data.columns)+1):
+    for i in range(1, 4):
         fast_ica = FastICA(n_components=i)
         S_ = fast_ica.fit(scaled_data).fit_transform(scaled_data)
         x_train, x_test, y_train, y_test = train_test_split(S_, target, test_size=0.2, random_state=1)
@@ -69,10 +70,12 @@ def Call_Model(data, target):
         test_sc_num = 0
         train_sc_num = 0
         for j in range(1,50):
+        # for j in range(49,50):
             # print(f'C = {j} ..........')
-            svr_model = SVR(C= j,kernel='rbf', degree= i, gamma='auto', max_iter=-1)
+            svr_model = SVR(C= j,kernel='poly', degree= i, gamma='auto', max_iter=-1)
             svr_model.fit(x_train, y_train)
             y_hat = svr_model.predict(x_test)
+
             #Score showing
             # print("Training  Score : ", svr_model.score(x_train,y_train))
             # print("Testing  Score : ", svr_model.score(x_test, y_test))
@@ -116,6 +119,7 @@ def Call_Model(data, target):
     #--------------Model result
     print(param_record)
     plt.title('SVR + ICA ')
+    plt.plot(range(1, len(data.columns) + 1), mse_fig, 'co-', label="Train Score")
     plt.plot(range(1, len(data.columns) + 1), mse_fig, 'co-', label="Train Score")
     plt.xlabel('ICA number')
     plt.ylabel('MSE value')
