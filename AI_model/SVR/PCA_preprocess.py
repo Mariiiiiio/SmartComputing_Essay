@@ -9,6 +9,8 @@ import numpy as np
 import time
 import sys
 
+plt.rcParams["font.sans-serif"]=["SimHei"] #设置字体
+plt.rcParams["axes.unicode_minus"]=False
 
 sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
 # sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
@@ -36,47 +38,52 @@ from data_process import data_col
 '''
 def  draw_graph(train_data, test_data , round_num):
 
-    plt.subplot(3, 2, round_num)
+    plt.subplot(4, 2, round_num)
     plt.title(f'PCA = {round_num}')
     plt.plot(range(1, 50), train_data, 'co-', label = f'train data', markersize=4)
     plt.plot(range(1, 50), test_data, 'go-', label = f'test data', markersize=4)
     plt.legend()
     plt.xlabel("C number")
     plt.ylabel("Value")
-def call_model(data, target):
-    start = time.time()
-
-if __name__ == '__main__':
     
-    start = time.time()
-    #--------------Data Collection
-    data1, data2, data1_1, data2_2, data3, data4, data5, data6 = data_col()
-
-    # 原始值-變數-轉換矩陣型態
-    data1_ar = np.array(data1)
-
-    data1_1ar = np.array(data1_1)
-    print(data1_1.columns)
-    # print(data1_1ar)
-
-    # 年增率-變數-轉換矩陣型態
-    data2_ar = np.array(data2)
-    data2_2ar = np.array(data2_2)
-    # print(data2_2ar)
-
-    #Target-setting-To array
-    target_ori = np.array(data5)
-    target_Year = np.array(data6)
-
-
+def Call_PCA_graph(data, original):
+    pca = PCA()
+    X_pca = pca.fit_transform(data)
+    PCnames = ['PC'+str(i+1) for i in range(pca.n_components_)]
+    Loadings = pd.DataFrame(data = pca.components_, columns=PCnames,index=original.columns)
+    print(Loadings.iloc[:,:])
+    exp_var_ratio = pca.explained_variance_ratio_
     
+    print(exp_var_ratio.shape)
+    #Draw Graph
+    plt.figure(figsize=(6, 4))
+    plt.bar(range(1, len(original.columns)+1), exp_var_ratio, alpha=0.5, label='individual explained ratio')
+    plt.ylabel('Explained variance ratio')
+    plt.xlabel('Principal components')
+    plt.legend(loc='best')
+    plt.tight_layout()
+    plt.show()
+    
+    Loadings["PC1"].sort_values().plot.barh()
+    plt.show()
+    
+    pass 
+
+def Call_Model_PCA(data, target):
+    start = time.time()
     #--------------Model testing
     best_mse = []
     param_record = {}
     mse_fig = []
     pca_record = {}
-
-    for i in range(1, 3):
+    
+    #Data preprocessing
+    from sklearn.preprocessing import StandardScaler as ss
+    scaled_data = ss().fit_transform(data)
+    Call_PCA_graph(scaled_data, data)
+    
+    
+    for i in range(1, len(data.columns)+1 ):
         
         #-----------container init
         mse_rec = 1000000
@@ -87,51 +94,48 @@ if __name__ == '__main__':
 
         print('-'*100+'Round('+str(i)+')')
         # -----------pca_model
+        
+    
+        
         pca_model = PCA(n_components=i)
-        pca_model.fit(data1_1)
-        X_pca = pca_model.transform(data1_1)
-        print('Data Shape :')
-        print(f'-----Origin Data shape : {data1_1.shape}')
-        print(f'-----PCA Data shape : {X_pca.shape}')
-
+        X_pca = pca_model.fit_transform(scaled_data)
+        # print('Data Shape :')
+        # print(f'-----Origin Data shape : {data.shape}')
+        # print(f'-----PCA Data shape : {X_pca.shape}')
+        
 
         # -----------Training & Testing Data prepare:
-        x_train, x_test, y_train, y_test = train_test_split(X_pca, data5, test_size=0.2, random_state=0)
+        x_train, x_test, y_train, y_test = train_test_split(X_pca, target, test_size=0.2, random_state=1, shuffle=True)
         
         # -----------Result
+        '''
         if i == 1:
-            pca_result = pd.DataFrame(pca_model.components_,columns=data1_1.columns,index = ['PC-1'])
+            pca_result = pd.DataFrame(pca_model.components_,columns=data.columns,index = ['PC-1'])
         elif i == 2:
-            pca_result = pd.DataFrame(pca_model.components_,columns=data1_1.columns,index = ['PC-1','PC-2'])
+            pca_result = pd.DataFrame(pca_model.components_,columns=data.columns,index = ['PC-1','PC-2'])
         elif i == 3:
-            pca_result = pd.DataFrame(pca_model.components_,columns=data1_1.columns,index = ['PC-1','PC-2', 'PC-3'])
+            pca_result = pd.DataFrame(pca_model.components_,columns=data.columns,index = ['PC-1','PC-2', 'PC-3'])
         elif i == 4:
-            pca_result = pd.DataFrame(pca_model.components_,columns=data1_1.columns,index = ['PC-1','PC-2', 'PC-3', 'PC-4'])
+            pca_result = pd.DataFrame(pca_model.components_,columns=data.columns,index = ['PC-1','PC-2', 'PC-3', 'PC-4'])
         elif i == 5:
-            pca_result = pd.DataFrame(pca_model.components_,columns=data1_1.columns,index = ['PC-1','PC-2', 'PC-3', 'PC-4', 'PC-5'])
+            pca_result = pd.DataFrame(pca_model.components_,columns=data.columns,index = ['PC-1','PC-2', 'PC-3', 'PC-4', 'PC-5'])
         elif i == 6:
-            pca_result = pd.DataFrame(pca_model.components_,columns=data1_1.columns,index = ['PC-1','PC-2', 'PC-3', 'PC-4', 'PC-5', 'PC-6'])
+            pca_result = pd.DataFrame(pca_model.components_,columns=data.columns,index = ['PC-1','PC-2', 'PC-3', 'PC-4', 'PC-5', 'PC-6'])
+        elif i == 7:
+            pca_result = pd.DataFrame(pca_model.components_,columns=data.columns,index = ['PC-1','PC-2', 'PC-3', 'PC-4', 'PC-5', 'PC-6', 'PC-7'])
         print(pca_result)
-        # print('PCA Result =====')
-        # print('PCA N_components : ', end='')
-        # print(pca_model.n_components_)
-        # print('PCA Ratio : ', end='')
-        # print(pca_model.explained_variance_ratio_) 
-        # print('PCA n_feature in:', end='')
-        # print(pca_model.n_features_in_)
-        # print('PCA feature name:', end='')
-        # print(pca_model.feature_names_in_)
-        # print('PCA singular values:', end='')
-        # print(pca_model.singular_values_)
-
+        '''
+        
+        '''
         pca_record[i] = {'PCA Compnoents':pca_model.components_,
                          'PCA N_components':pca_model.n_components_, 
                          'PCA Ratio' : pca_model.explained_variance_ratio_, 
                          'PCA n_feature' : pca_model.n_features_in_, 
-                         'PCA feature_names':pca_model.feature_names_in_,
+                        #  'PCA feature_names':pca_model.feature_names_in_,
                         #  'PCA Result' : pca_result
                         #  'PCA singular values':pca_model.singular_values_
                         }
+        '''
         
         # -----------SVR_model
         print('SVR Result =====')
@@ -139,10 +143,10 @@ if __name__ == '__main__':
         train_sc = []
         test_sc_num = 0
         train_sc_num = 0
-        for j in range(49,50):
+        for j in range(1,50):
             
-            print(f'C = {j} ..........')
-            svr_model = SVR(C= j,kernel='poly', degree= 3, gamma='auto', max_iter=-1)
+            # print(f'C = {j} ..........')
+            svr_model = SVR(C= j,kernel='sigmoid', degree= 3, gamma='auto', max_iter=-1)
             svr_model.fit(x_train, y_train)
             y_hat = svr_model.predict(x_test)
             #Score showing
@@ -160,9 +164,9 @@ if __name__ == '__main__':
                 train_sc_num = svr_model.score(x_train,y_train)
             train_sc.append(svr_model.score(x_train, y_train))
             test_sc.append(svr_model.score(x_test, y_test))
-        # draw_graph(train_sc, test_sc, i)
+        draw_graph(train_sc, test_sc, i)
         mse_fig.append(mse_rec)
-        param_record[i] = {'C': j, 
+        param_record[i] = {'C': count, 
                             'best_mse_score': mse_rec, 
                             'R2_score': r2_rec, 
                             'Training score' : train_sc_num, 
@@ -183,15 +187,69 @@ if __name__ == '__main__':
                     hspace=0.35)
     plt.show()
     #PCA result
-    print(pca_record)
+    # print(pca_record)
 
     #--------------Model result
     print(param_record)
     plt.title('SVR + PCA ')
-    plt.plot(range(1, 7), mse_fig, 'co-', label="Train Score")
+    plt.plot(range(1, len(data.columns)+1), mse_fig, 'co-', label="Train Score")
     plt.xlabel('pca number')
     plt.ylabel('MSE value')
     plt.show()
 
 
     #show plot
+
+
+
+def Call_497data():
+
+    # Data loading
+    data1, data2, data1_1, data2_2, data3, data4, data5, data6 = data_col()
+    
+    data_column = ['金屬機電工業', '資訊電子工業', '化學工業', '民生工業', '電力及燃氣供應業', '用水供應業']
+
+    # 原始值-變數-轉換矩陣型態
+    data1_ar = np.array(data1)
+    data1_1ar = np.array(data1_1)
+
+    # 年增率-變數-轉換矩陣型態
+    #Target-setting-To array
+    target_ori = np.array(data5)
+    data1_1.drop('製造業', axis=1, inplace=True)
+    # print(data1_1.columns)
+    print(f'Data number : {data1_1.shape}, target number : {target_ori.shape}')
+    Call_Model_PCA(data1_1, target_ori)
+
+
+def Call_329data():
+    data1 = pd.read_csv('..\\..\\OriginalValue(329).csv',encoding='cp950')
+    
+    
+
+    #Split the year from the data
+    data1_Orininal_year = data1.iloc[:, 0]
+    data1.drop(' ', axis=1, inplace=True)
+    # print(data1.head(10))
+    data1 = data1.astype('float64')
+
+
+
+    #target set : 總指數 and 總指數(不含土石採取業)
+    target_data1 = data1.iloc[:, 0]
+    #target set : train value -> data except year and 總指數
+    
+    data1.drop(['總指數', '總指數(不含土石採取業)', '製造業'], axis=1, inplace=True)
+    print(data1.columns)
+    print(f'Data number : {data1.shape}, target number : {target_data1.shape}')
+    # print(data1.head(10))
+    # print(target_data1.head(10))
+    Call_Model_PCA(data1, target_data1)
+if __name__ == '__main__':
+    print('-'*50+'329')
+    Call_329data()
+
+    print('-'*50+'497')
+    Call_497data()
+    
+    

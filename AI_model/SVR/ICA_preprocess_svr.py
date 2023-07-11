@@ -39,7 +39,7 @@ def  draw_graph(train_data, test_data , round_num):
     plt.ylabel("Value")
     # plt.show()
     
-def Call_Model(data, target):
+def Call_Model_ICA(data, target):
     start = time.time()
     
    
@@ -147,7 +147,7 @@ def Call_497data():
     data1_1.drop('製造業', axis=1, inplace=True)
     # print(data1_1.columns)
     print(f'Data number : {data1_1.shape}, target number : {target_ori.shape}')
-    Call_Model(data1_1, target_ori)
+    Call_Model_ICA(data1_1, target_ori)
 
 
 def Call_329data():
@@ -172,7 +172,7 @@ def Call_329data():
     print(f'Data number : {data1.shape}, target number : {target_data1.shape}')
     # print(data1.head(10))
     # print(target_data1.head(10))
-    Call_Model(data1, target_data1)
+    Call_Model_ICA(data1, target_data1)
 
 
 if __name__ == '__main__':

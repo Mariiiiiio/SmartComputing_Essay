@@ -6,9 +6,9 @@ from sklearn.decomposition import PCA
 from sklearn import preprocessing
 import pandas as pd
 
-sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
+# sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
 
-# sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
+sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
 
 from data_process import data_col
 
@@ -71,7 +71,7 @@ if __name__ == '__main__':
     print(exp_var_ratio)
 
     plt.figure(figsize=(6, 4))
-    plt.bar(range(6), exp_var_ratio, alpha=0.5, label='individual explained ratio')
+    plt.bar(range(1, 8), exp_var_ratio, alpha=0.5, label='individual explained ratio')
     plt.ylabel('Explained variance ratio')
     plt.xlabel('Principal components')
     plt.legend(loc='best')
@@ -80,6 +80,11 @@ if __name__ == '__main__':
 
 
     PCnames = ['PC'+str(i+1) for i in range(pca.n_components_)]
+    print('-'*50+'test')
+    print(pca.components_.shape)
+    print(len(PCnames))
+    print(data1_1.columns.shape)
+    
     Loadings = pd.DataFrame(pca.components_,columns=PCnames,index=data1_1.columns)
     
     print(Loadings.iloc[:,:])
