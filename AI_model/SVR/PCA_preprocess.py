@@ -43,10 +43,11 @@ def  draw_graph(train_data, test_data , round_num):
     plt.legend()
     plt.xlabel("C number")
     plt.ylabel("Value")
-
-
+def call_model(data, target):
+    start = time.time()
 
 if __name__ == '__main__':
+    
     start = time.time()
     #--------------Data Collection
     data1, data2, data1_1, data2_2, data3, data4, data5, data6 = data_col()

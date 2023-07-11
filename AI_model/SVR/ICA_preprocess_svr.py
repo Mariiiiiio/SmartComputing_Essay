@@ -10,11 +10,12 @@ from sklearn.svm import SVR
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_absolute_error as mse
 
-sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
+# sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
 
-# sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
+sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
 
-from data_process import data_col, data_col_329
+from data_process import data_col
+
 
 ''' Documents : 
     data1 : 原始值-變數
@@ -36,15 +37,14 @@ def  draw_graph(train_data, test_data , round_num):
     plt.legend()
     plt.xlabel("C number")
     plt.ylabel("Value")
-
+    # plt.show()
+    
 def Call_Model(data, target):
     start = time.time()
     
    
-    
     #StandardScaler 
     from sklearn.preprocessing import StandardScaler as ss
-    
     scaled_data = ss().fit_transform(data)
 
     best_mse = []
@@ -54,7 +54,7 @@ def Call_Model(data, target):
 
     # print(scaled_data.shape)
     # for i in range(1, len(data.columns)+1):
-    for i in range(1, 7):
+    for i in range(1, len(data.columns)+1):
         fast_ica = FastICA(n_components=i)
         S_ = fast_ica.fit(scaled_data).fit_transform(scaled_data)
         x_train, x_test, y_train, y_test = train_test_split(S_, target, test_size=0.2, random_state=1)
@@ -64,15 +64,16 @@ def Call_Model(data, target):
         r2_rec = 0
 
         # -----------SVR_model
-        print('SVR Result =====')
+        print(f'SVR Result ........... ({i})')
         test_sc = []
         train_sc = []
         test_sc_num = 0
         train_sc_num = 0
+        
         for j in range(1,50):
 
             # print(f'C = {j} ..........')
-            svr_model = SVR(C= j,kernel='poly', degree= i, gamma='auto', max_iter=-1)
+            svr_model = SVR(C= j,kernel='sigmoid', degree= 100, gamma='auto', max_iter=-1)
             svr_model.fit(x_train, y_train)
 
             y_hat = svr_model.predict(x_test)
@@ -90,12 +91,13 @@ def Call_Model(data, target):
                 r2_rec = r2_score(y_test, y_hat)
                 test_sc_num = svr_model.score(x_test, y_test)
                 train_sc_num = svr_model.score(x_train,y_train)
+                
             train_sc.append(svr_model.score(x_train, y_train))
             test_sc.append(svr_model.score(x_test, y_test))
 
         draw_graph(train_sc, test_sc, i)
         mse_fig.append(mse_rec)
-        param_record[i] = {'C': j, 
+        param_record[i] = {'C': count, 
                            'best_mse_score': mse_rec, 
                            'R2_score': r2_rec, 
                            'Training score' : train_sc_num, 
@@ -115,15 +117,14 @@ def Call_Model(data, target):
                     wspace=0.2, 
                     hspace=0.35)
     plt.show()
-    #PCA result
-    print(Ica_record)
-
+    #ICA result 
+    
     #--------------Model result
 
     print(param_record)
+    
     plt.title('SVR + ICA ')
-    plt.plot(range(1, len(data.columns)), mse_fig, 'co-', label="Train Score")
-    plt.plot(range(1, len(data.columns)), mse_fig, 'co-', label="Train Score")
+    plt.plot(range(1, len(data.columns)+1), mse_fig, 'co-', label="Train Score")
     plt.xlabel('ICA number')
     plt.ylabel('MSE value')
     plt.show()
@@ -143,22 +144,42 @@ def Call_497data():
     # 年增率-變數-轉換矩陣型態
     #Target-setting-To array
     target_ori = np.array(data5)
-
+    data1_1.drop('製造業', axis=1, inplace=True)
+    # print(data1_1.columns)
+    print(f'Data number : {data1_1.shape}, target number : {target_ori.shape}')
     Call_Model(data1_1, target_ori)
 
 
 def Call_329data():
-    data, target = data_col_329()
-    print(f'Data number : {data.shape}, target number : {target.shape}')
+    data1 = pd.read_csv('..\\..\\OriginalValue(329).csv',encoding='cp950')
+    
+    
 
-    Call_Model(data, target)
+    #Split the year from the data
+    data1_Orininal_year = data1.iloc[:, 0]
+    data1.drop(' ', axis=1, inplace=True)
+    # print(data1.head(10))
+    data1 = data1.astype('float64')
+
+
+
+    #target set : 總指數 and 總指數(不含土石採取業)
+    target_data1 = data1.iloc[:, 0]
+    #target set : train value -> data except year and 總指數
+    
+    data1.drop(['總指數', '總指數(不含土石採取業)', '製造業'], axis=1, inplace=True)
+    print(data1.columns)
+    print(f'Data number : {data1.shape}, target number : {target_data1.shape}')
+    # print(data1.head(10))
+    # print(target_data1.head(10))
+    Call_Model(data1, target_data1)
 
 
 if __name__ == '__main__':
     print('-'*50+'329')
-    # Call_329data()
+    Call_329data()
 
-
+    print('-'*50+'497')
     Call_497data()
 
 
