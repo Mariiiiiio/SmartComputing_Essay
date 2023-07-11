@@ -54,7 +54,7 @@ def Call_Model(data, target):
 
     # print(scaled_data.shape)
     # for i in range(1, len(data.columns)+1):
-    for i in range(1, 4):
+    for i in range(1, 7):
         fast_ica = FastICA(n_components=i)
         S_ = fast_ica.fit(scaled_data).fit_transform(scaled_data)
         x_train, x_test, y_train, y_test = train_test_split(S_, target, test_size=0.2, random_state=1)
@@ -70,10 +70,11 @@ def Call_Model(data, target):
         test_sc_num = 0
         train_sc_num = 0
         for j in range(1,50):
-        # for j in range(49,50):
+
             # print(f'C = {j} ..........')
             svr_model = SVR(C= j,kernel='poly', degree= i, gamma='auto', max_iter=-1)
             svr_model.fit(x_train, y_train)
+
             y_hat = svr_model.predict(x_test)
 
             #Score showing
@@ -91,6 +92,7 @@ def Call_Model(data, target):
                 train_sc_num = svr_model.score(x_train,y_train)
             train_sc.append(svr_model.score(x_train, y_train))
             test_sc.append(svr_model.score(x_test, y_test))
+
         draw_graph(train_sc, test_sc, i)
         mse_fig.append(mse_rec)
         param_record[i] = {'C': j, 
@@ -117,36 +119,30 @@ def Call_Model(data, target):
     print(Ica_record)
 
     #--------------Model result
+
     print(param_record)
     plt.title('SVR + ICA ')
-    plt.plot(range(1, len(data.columns) + 1), mse_fig, 'co-', label="Train Score")
-    plt.plot(range(1, len(data.columns) + 1), mse_fig, 'co-', label="Train Score")
+    plt.plot(range(1, len(data.columns)), mse_fig, 'co-', label="Train Score")
+    plt.plot(range(1, len(data.columns)), mse_fig, 'co-', label="Train Score")
     plt.xlabel('ICA number')
     plt.ylabel('MSE value')
     plt.show()
 
+
 def Call_497data():
+
     # Data loading
     data1, data2, data1_1, data2_2, data3, data4, data5, data6 = data_col()
     
     data_column = ['金屬機電工業', '資訊電子工業', '化學工業', '民生工業', '電力及燃氣供應業', '用水供應業']
 
-    #------------Data Re-Organize
-    
     # 原始值-變數-轉換矩陣型態
     data1_ar = np.array(data1)
-    
-    # print(data1_1.head(10))
-    # data1_1ar = np.array(data1_1.drop('製造業',axis=1))
     data1_1ar = np.array(data1_1)
 
     # 年增率-變數-轉換矩陣型態
-    # data2_ar = np.array(data2)
-    # data2_2ar = np.array(data2_2)
-
     #Target-setting-To array
     target_ori = np.array(data5)
-    # target_Year = np.array(data6)
 
     Call_Model(data1_1, target_ori)
 
@@ -154,12 +150,13 @@ def Call_497data():
 def Call_329data():
     data, target = data_col_329()
     print(f'Data number : {data.shape}, target number : {target.shape}')
+
     Call_Model(data, target)
 
 
 if __name__ == '__main__':
-    Call_329data()
-    
+    print('-'*50+'329')
+    # Call_329data()
 
 
     Call_497data()

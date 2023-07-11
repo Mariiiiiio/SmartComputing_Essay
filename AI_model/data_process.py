@@ -75,20 +75,20 @@ def data_col_329():
     #Split the year from the data
     data1_Orininal_year = data1.iloc[:, 0]
     data1.drop(' ', axis=1, inplace=True)
-    print(data1.head(10))
+    # print(data1.head(10))
     data1 = data1.astype('float64')
 
 
 
     #target set : 總指數 and 總指數(不含土石採取業)
     target_data1 = data1.iloc[:, 0]
-    print(target_data1.head(10))
+    # print(target_data1.head(10))
 
-    print('-'*50)
+    # print('-'*50)
     #target set : train value -> data except year and 總指數
     data1.drop(['總指數', '總指數(不含土石採取業)', '製造業'], axis=1, inplace=True)
-    print(data1.head(10))
-    print(data1.columns)
+    # print(data1.head(10))
+    # print(data1.columns)
     return data1, target_data1
 if __name__ == '__main__':
     # data_col_329()
