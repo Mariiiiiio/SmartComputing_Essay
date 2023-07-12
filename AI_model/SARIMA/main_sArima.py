@@ -9,9 +9,9 @@ import time
 import sys  
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 import pmdarima as pm
-sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
+# sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
 
-# sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
+sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
 from data_process import data_col
 
 
@@ -54,14 +54,16 @@ if __name__== "__main__":
     
     
     forecast_test_auto = auto_arima.predict(n_periods=len(df_test))
+    
     print('-'*50)
     print(forecast_test_auto)
+    
     df =  [None]*len(df_train) + list(forecast_test_auto)
-
     df.plot()
     plt.show()
-    '''
-    residuals = model_fit.resid[1:]
+    
+    
+    residuals = forecast_test_auto.resid[1:]
     fig, ax = plt.subplots(1,2)
     residuals.plot(title='Residuals', ax=ax[0])
     residuals.plot(title='Density', kind='kde', ax=ax[1])
@@ -72,9 +74,9 @@ if __name__== "__main__":
     pacf_res = plot_pacf(residuals)
     plt.show()
     
-    forecast_test = model_fit.forecast(len(df_test))
+    forecast_test = forecast_test_auto.forecast(len(df_test))
 
-    '''
+    
     # df['forecast_manual'] = [None]*len(df_train) + list(forecast_test)
 
     # plt.show()
