@@ -14,25 +14,25 @@ sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
 
 # sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
 
-from data_process import data_col
+from data_process import data_col, lessData
 
 
 if __name__== "__main__":
     data1, data2, data1_1, data2_2, data3, data4, data5, data6 = data_col()
-    
+    # data1, data5 =  lessData()
     
     df = np.log(data5)
     df.plot()
     plt.show()
     
-    msk = (df.index < len(df)-30)
-
+    n = 100 #number of tesing data
+    msk = (df.index < len(df)-n)
+    
     df_train = df[msk].copy()
     df_test = df[~msk].copy()
     
-    print(df_train)
-    print(df_test)
-    
+    print(len(df_train))
+    print(len(df_test))
     df_test.replace([np.inf, -np.inf], 0, inplace=True)
 
     acf_original = plot_acf(df_train)
@@ -55,7 +55,6 @@ if __name__== "__main__":
     print(model_fit.summary())
     import matplotlib.pyplot as plt
 
-
     residuals = model_fit.resid[1:]
     fig, ax = plt.subplots(1,2)
     residuals.plot(title='Residuals', ax=ax[0])
@@ -63,16 +62,11 @@ if __name__== "__main__":
     plt.show()
     
     acf_res = plot_acf(residuals)
-
     pacf_res = plot_pacf(residuals)
     plt.show()
     
     forecast_test = model_fit.forecast(len(df_test))
 
-    # df['forecast_manual'] = [None]*len(df_train) + list(forecast_test)
-
-    # plt.show()
-    
     from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error
 
     mae = mean_absolute_error(df_test, forecast_test)

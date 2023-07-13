@@ -9,31 +9,38 @@ import time
 import sys  
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 import pmdarima as pm
-# sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
+sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
 
-sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
-from data_process import data_col
+# sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
+from data_process import data_col, lessData
 
 
 if __name__== "__main__":
-    data1, data2, data1_1, data2_2, data3, data4, data5, data6 = data_col()
+    # data1, data2, data1_1, data2_2, data3, data4, target, data6 = data_col()
+    data1, target =  lessData()
+    df = np.log(target)
+    ''' draw year graph
     
-    df = np.log(data5)
     df.plot()
     plt.show()
-    
-    msk = (df.index < len(df)-30)
+    '''
+
+
+    n = 52 #number of testing data
+    msk = (df.index < len(df)-n)
     df_train = df[msk].copy()
     df_test = df[~msk].copy()
     
-    print(df_train)
-    print(df_test)
+    # print(df_train)
+    # print(df_test)
     df_test.replace([np.inf, -np.inf], 0, inplace=True)
+    
+    ''' Draw ACF PACF graph
     acf_original = plot_acf(df_train)
 
     pacf_original = plot_pacf(df_train)
     plt.show()
-    
+    '''
     from statsmodels.tsa.stattools import adfuller
 
     adf_test = adfuller(df_train)
@@ -46,39 +53,43 @@ if __name__== "__main__":
     # pacf_diff = plot_pacf(df_train_diff)
     # plt.show()
     
-    auto_arima  = pm.auto_arima(df_train, stepwise=False, seasonal=True)
+
+    # auto_arima  = pm.auto_arima(df_train, stepwise=False, seasonal=False)
+    auto_arima  = pm.auto_arima(df_train, stepwise=False, seasonal=True, m = 24)
+    # model_fit = auto_arima.fit()
+
     print(auto_arima)
     print(auto_arima.summary())
-    
+
     import matplotlib.pyplot as plt
-    
     
     forecast_test_auto = auto_arima.predict(n_periods=len(df_test))
     
     print('-'*50)
     print(forecast_test_auto)
     
-    df =  [None]*len(df_train) + list(forecast_test_auto)
-    df.plot()
-    plt.show()
-    
-    
-    residuals = forecast_test_auto.resid[1:]
-    fig, ax = plt.subplots(1,2)
-    residuals.plot(title='Residuals', ax=ax[0])
-    residuals.plot(title='Density', kind='kde', ax=ax[1])
-    plt.show()
-    
-    acf_res = plot_acf(residuals)
 
-    pacf_res = plot_pacf(residuals)
-    plt.show()
-    
-    forecast_test = forecast_test_auto.forecast(len(df_test))
+    # df['forecast_auto'] = [None]*len(df_train) + list(forecast_test_auto)
+    # df.plot()   
+    # plt.show()
 
+
+    # df =  [None]*len(df_train) + list(forecast_test_auto)
+    # df.plot()
+   
+    # residuals = auto_arima.resid[1:]
+    # fig, ax = plt.subplots(1,2)
+    # residuals.plot(title='Residuals', ax=ax[0])
+    # residuals.plot(title='Density', kind='kde', ax=ax[1])
+    # plt.show()
     
+    # acf_res = plot_acf(residuals)
+    # pacf_res = plot_pacf(residuals)
+    # plt.show()
+    
+    # forecast_test = model_fit.forecast(len(df_test))
+
     # df['forecast_manual'] = [None]*len(df_train) + list(forecast_test)
-
     # plt.show()
     
     from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error

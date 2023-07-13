@@ -12,9 +12,9 @@ import sys
 plt.rcParams["font.sans-serif"]=["SimHei"] #设置字体
 plt.rcParams["axes.unicode_minus"]=False
 
-sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
-# sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
-from data_process import data_col
+# sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
+sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
+from data_process import data_col, lessData
 
 
 # Documents : 
@@ -105,7 +105,7 @@ def Call_Model_PCA(data, target):
         
 
         # -----------Training & Testing Data prepare:
-        x_train, x_test, y_train, y_test = train_test_split(X_pca, target, test_size=0.2, random_state=1, shuffle=True)
+        x_train, x_test, y_train, y_test = train_test_split(X_pca, target, test_size=0.2, random_state=1)
         
         # -----------Result
         '''
@@ -216,7 +216,8 @@ def Call_497data():
     # 年增率-變數-轉換矩陣型態
     #Target-setting-To array
     target_ori = np.array(data5)
-    data1_1.drop('製造業', axis=1, inplace=True)
+    print(print(data1_1.head(10)))
+    # data1_1.drop('製造業', axis=1, inplace=True)
     # print(data1_1.columns)
     print(f'Data number : {data1_1.shape}, target number : {target_ori.shape}')
     Call_Model_PCA(data1_1, target_ori)
@@ -247,7 +248,7 @@ def Call_329data():
     Call_Model_PCA(data1, target_data1)
 if __name__ == '__main__':
     print('-'*50+'329')
-    Call_329data()
+    # Call_329data()
 
     print('-'*50+'497')
     Call_497data()
