@@ -10,9 +10,9 @@ from sklearn.svm import SVR
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_absolute_error as mse
 
-# sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
+sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
 
-sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
+# sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
 
 from data_process import data_col
 
@@ -57,7 +57,32 @@ def Call_Model_ICA(data, target):
     for i in range(1, len(data.columns)+1):
         fast_ica = FastICA(n_components=i)
         S_ = fast_ica.fit(scaled_data).fit_transform(scaled_data)
-        x_train, x_test, y_train, y_test = train_test_split(S_, target, test_size=0.2, random_state=1)
+
+
+        # -----------Training & Testing Data prepare:
+        '''
+        ----------DataSet split
+        Data : 497
+            >>> training set : 397
+                >>> Date : 1982 M1 ~ 2014 M12
+            >>> testing set : 100
+                >>> Date : 2015 M1 ~ 2023 M4
+
+        Data : 329
+            >>> training set : 276
+                >>> Date : 1996 M1 ~ 2018 M12
+            >>> testing set : 52
+                >>> Date : 2019 M1 ~ 2023 M4
+        '''
+        n = 276 # Number of Training Data
+        x_train = S_[:][:n].copy()
+        x_test = S_[:][n:].copy()
+    
+        y_train = target[:][:n].copy()
+        y_test = target[:][n:].copy()
+
+        print(f'X training data : {x_train.shape},\n x testing data : {x_test.shape}, \n y training data : {y_train.shape}, \n y testing data : {y_test.shape} ')
+        
 
         mse_rec = 1000000
         count = 0
@@ -73,7 +98,7 @@ def Call_Model_ICA(data, target):
         for j in range(1,50):
 
             # print(f'C = {j} ..........')
-            svr_model = SVR(C= j,kernel='sigmoid', degree= 100, gamma='auto', max_iter=-1)
+            svr_model = SVR(C= j,kernel='poly', degree= 100, gamma='auto', max_iter=-1)
             svr_model.fit(x_train, y_train)
 
             y_hat = svr_model.predict(x_test)
@@ -144,14 +169,14 @@ def Call_497data():
     # 年增率-變數-轉換矩陣型態
     #Target-setting-To array
     target_ori = np.array(data5)
-    data1_1.drop('製造業', axis=1, inplace=True)
+    # data1_1.drop('製造業', axis=1, inplace=True)
     # print(data1_1.columns)
     print(f'Data number : {data1_1.shape}, target number : {target_ori.shape}')
     Call_Model_ICA(data1_1, target_ori)
 
 
 def Call_329data():
-    data1 = pd.read_csv('..\\..\\OriginalValue(329).csv',encoding='cp950')
+    data1 = pd.read_csv('OriginalValue(329).csv',encoding='cp950')
     
     
 

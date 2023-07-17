@@ -27,7 +27,8 @@ if __name__== "__main__":
     
     n = 100 #number of tesing data
     msk = (df.index < len(df)-n)
-    
+    print(df.index)
+    print(msk)
     df_train = df[msk].copy()
     df_test = df[~msk].copy()
     
@@ -59,11 +60,11 @@ if __name__== "__main__":
     fig, ax = plt.subplots(1,2)
     residuals.plot(title='Residuals', ax=ax[0])
     residuals.plot(title='Density', kind='kde', ax=ax[1])
-    plt.show()
+    # plt.show()
     
     acf_res = plot_acf(residuals)
     pacf_res = plot_pacf(residuals)
-    plt.show()
+    # plt.show()
     
     forecast_test = model_fit.forecast(len(df_test))
 

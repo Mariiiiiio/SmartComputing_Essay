@@ -2,7 +2,6 @@ from sklearn.decomposition import PCA
 from sklearn.svm import SVR
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_absolute_error as mse
-from sklearn.model_selection import train_test_split
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -28,10 +27,6 @@ from data_process import data_col, lessData
         data4 : 年增率-目標
         data5 : 原始值（不包含礦業與土石採取業) -目標
         data6 : 年增率（不包含礦業與土石採取業) -目標
-----------PCA Result:
-
-
-
 
 ----------
 
@@ -44,7 +39,7 @@ def  draw_graph(train_data, test_data , round_num):
     plt.plot(range(1, 50), test_data, 'go-', label = f'test data', markersize=4)
     plt.legend()
     plt.xlabel("C number")
-    plt.ylabel("Value")
+    plt.ylabel("Testing & Training Score ")
     
 def Call_PCA_graph(data, original):
     pca = PCA()
@@ -105,7 +100,28 @@ def Call_Model_PCA(data, target):
         
 
         # -----------Training & Testing Data prepare:
-        x_train, x_test, y_train, y_test = train_test_split(X_pca, target, test_size=0.2, random_state=1)
+        '''
+        ----------DataSet split
+        Data : 497
+            >>> training set : 397
+                >>> Date : 1982 M1 ~ 2014 M12
+            >>> testing set : 100
+                >>> Date : 2015 M1 ~ 2023 M4
+
+        Data : 329
+            >>> training set : 276
+                >>> Date : 1996 M1 ~ 2018 M12
+            >>> testing set : 52
+                >>> Date : 2019 M1 ~ 2023 M4
+        '''
+        n = 276 # Number of Training Data
+        x_train = X_pca[:][:n].copy()
+        x_test = X_pca[:][n:].copy()
+    
+        y_train = target[:][:n].copy()
+        y_test = target[:][n:].copy()
+
+        print(f'X training data : {x_train.shape},\n x testing data : {x_test.shape}, \n y training data : {y_train.shape}, \n y testing data : {y_test.shape} ')
         
         # -----------Result
         '''
@@ -137,6 +153,8 @@ def Call_Model_PCA(data, target):
                         }
         '''
         
+        
+
         # -----------SVR_model
         print('SVR Result =====')
         test_sc = []
@@ -146,7 +164,7 @@ def Call_Model_PCA(data, target):
         for j in range(1,50):
             
             # print(f'C = {j} ..........')
-            svr_model = SVR(C= j,kernel='sigmoid', degree= 3, gamma='auto', max_iter=-1)
+            svr_model = SVR(C= j,kernel='poly', degree= 3, gamma='auto', max_iter=-1)
             svr_model.fit(x_train, y_train)
             y_hat = svr_model.predict(x_test)
             #Score showing
@@ -216,7 +234,7 @@ def Call_497data():
     # 年增率-變數-轉換矩陣型態
     #Target-setting-To array
     target_ori = np.array(data5)
-    print(print(data1_1.head(10)))
+    # print(print(data1_1.head(10)))
     # data1_1.drop('製造業', axis=1, inplace=True)
     # print(data1_1.columns)
     print(f'Data number : {data1_1.shape}, target number : {target_ori.shape}')
@@ -224,7 +242,7 @@ def Call_497data():
 
 
 def Call_329data():
-    data1 = pd.read_csv('..\\..\\OriginalValue(329).csv',encoding='cp950')
+    data1 = pd.read_csv('OriginalValue(329).csv',encoding='cp950')
     
     
 
@@ -248,9 +266,9 @@ def Call_329data():
     Call_Model_PCA(data1, target_data1)
 if __name__ == '__main__':
     print('-'*50+'329')
-    # Call_329data()
+    Call_329data()
 
-    print('-'*50+'497')
-    Call_497data()
+    # print('-'*50+'497')
+    # Call_497data()
     
     

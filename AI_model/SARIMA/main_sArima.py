@@ -9,6 +9,10 @@ import time
 import sys  
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 import pmdarima as pm
+
+from PyEMD import EMD
+import pylab as plt
+
 sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
 
 # sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
