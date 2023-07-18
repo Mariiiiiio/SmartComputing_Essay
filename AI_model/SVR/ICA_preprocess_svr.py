@@ -57,7 +57,7 @@ def Call_Model_ICA(data, target):
     for i in range(1, len(data.columns)+1):
         fast_ica = FastICA(n_components=i)
         S_ = fast_ica.fit(scaled_data).fit_transform(scaled_data)
-
+        print(S_.shape)
 
         # -----------Training & Testing Data prepare:
         '''
@@ -77,7 +77,8 @@ def Call_Model_ICA(data, target):
         n = 276 # Number of Training Data
         x_train = S_[:][:n].copy()
         x_test = S_[:][n:].copy()
-    
+        print(x_train)  
+        
         y_train = target[:][:n].copy()
         y_test = target[:][n:].copy()
 
