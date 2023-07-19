@@ -235,7 +235,7 @@ if __name__== "__main__":
     
 
     
-    # for i in range(2, 22):
+    for i in range(2, 49):
     #     print(f'--------------------------{i} Round')
         
     
@@ -248,80 +248,80 @@ if __name__== "__main__":
 
 
     
-    n = 397 #number of testing data
-    df_train = df[:][:n].copy()
-    df_test = df[:][n:].copy()
+        n = 397 #number of testing data
+        df_train = df[:][:n].copy()
+        df_test = df[:][n:].copy()
 
-    df_train = df_train
-    df_test = df_test
-    # print(df_train)
-    print(f'train : {df_train.shape}')
-    print(f'test : {df_test.shape}')
-    
-    df_test.replace([np.inf, -np.inf], 0, inplace=True)
-
-
-
-    # Draw ACF PACF graph
-    acf_original = plot_acf(df_train)
-
-    pacf_original = plot_pacf(df_train)
-    # plt.show()
+        df_train = df_train
+        df_test = df_test
+        # print(df_train)
+        print(f'train : {df_train.shape}')
+        print(f'test : {df_test.shape}')
+        
+        df_test.replace([np.inf, -np.inf], 0, inplace=True)
 
 
 
-    from statsmodels.tsa.stattools import adfuller
+        # Draw ACF PACF graph
+        acf_original = plot_acf(df_train)
 
-    adf_test = adfuller(df_train)
-    print(f'p-value: {adf_test[1]}')
-    
-    # df_train_diff = df_train.diff().dropna()
-    # df_train_diff.plot()    
-    
-    # acf_diff = plot_acf(df_train_diff)
-    # pacf_diff = plot_pacf(df_train_diff)
-    # plt.show()
-    
-
-    # auto_arima  = pm.auto_arima(df_train, stepwise=False, seasonal=False)
-    auto_arima  = pm.auto_arima(df_train, stepwise=False, seasonal=True, m = 12 )
-    # model_fit = auto_arima.fit()
-    auto_arima.fit(df_train)    
-    
-    # print(auto_arima)
-    
-    print(auto_arima.summary())
-
-    import matplotlib.pyplot as plt
-    
-    forecast_test_auto = auto_arima.predict(n_periods=len(df_test))
-    
-    print('-'*50)
-    # print(forecast_test_auto)
-    
-    forecast_test_auto = pd.DataFrame(forecast_test_auto,index = df_test.index,columns=['Prediction'])
-    
-    concat1 = pd.concat([df_test, forecast_test_auto],axis=1)
-    concat2 = pd.concat([target,forecast_test_auto],axis=1)
-    print(concat1)
-    print(concat2)
-    concat1.plot()
-    concat2.plot()
-    plt.show()
-    
-    from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error
-
-    mae = mean_absolute_error(df_test, forecast_test_auto)
-    mape = mean_absolute_percentage_error(df_test, forecast_test_auto)
-    rmse = np.sqrt(mean_squared_error(df_test, forecast_test_auto))
-    r2_rec = r2_score(df_test, forecast_test_auto)
+        pacf_original = plot_pacf(df_train)
+        # plt.show()
 
 
-    print(f'mae - auto: {mae}')
-    print(f'mape - auto: {mape}')
-    print(f'rmse - auto: {rmse}')
-    print(f'R2 score : {r2_rec}')
-    
+
+        from statsmodels.tsa.stattools import adfuller
+
+        adf_test = adfuller(df_train)
+        print(f'p-value: {adf_test[1]}')
+        
+        # df_train_diff = df_train.diff().dropna()
+        # df_train_diff.plot()    
+        
+        # acf_diff = plot_acf(df_train_diff)
+        # pacf_diff = plot_pacf(df_train_diff)
+        # plt.show()
+        
+
+        # auto_arima  = pm.auto_arima(df_train, stepwise=False, seasonal=False)
+        auto_arima  = pm.auto_arima(df_train, stepwise=False, seasonal=True, m = 12 )
+        # model_fit = auto_arima.fit()
+        auto_arima.fit(df_train)    
+        
+        # print(auto_arima)
+        
+        print(auto_arima.summary())
+
+        import matplotlib.pyplot as plt
+        
+        forecast_test_auto = auto_arima.predict(n_periods=len(df_test))
+        
+        print('-'*50)
+        # print(forecast_test_auto)
+        
+        forecast_test_auto = pd.DataFrame(forecast_test_auto,index = df_test.index,columns=['Prediction'])
+        
+        concat1 = pd.concat([df_test, forecast_test_auto],axis=1)
+        concat2 = pd.concat([target,forecast_test_auto],axis=1)
+        # print(concat1)
+        # print(concat2)
+        # concat1.plot()
+        # concat2.plot()
+        # plt.show()
+        
+        from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error
+
+        mae = mean_absolute_error(df_test, forecast_test_auto)
+        mape = mean_absolute_percentage_error(df_test, forecast_test_auto)
+        rmse = np.sqrt(mean_squared_error(df_test, forecast_test_auto))
+        r2_rec = r2_score(df_test, forecast_test_auto)
 
 
-    
+        print(f'mae - auto: {mae}')
+        print(f'mape - auto: {mape}')
+        print(f'rmse - auto: {rmse}')
+        print(f'R2 score : {r2_rec}')
+        
+
+
+        
