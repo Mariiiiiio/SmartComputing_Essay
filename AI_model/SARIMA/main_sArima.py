@@ -14,11 +14,34 @@ import pylab as plt
 from scipy.signal import argrelextrema
 import scipy.interpolate as spi
 import pandas as pd
+from chart_studio.plotly import plot_mpl
+
 
 sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
 
-# sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
-from data_process import data_col, lessData
+sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
+from data_process import data_col#, lessData
+
+
+# -----------Training & Testing Data prepare:
+'''
+    ----------DataSet split
+    Data : 497
+        >>> training set : 397
+            >>> Date : 1982 M1 ~ 2014 M12
+        >>> testing set : 100
+            >>> Date : 2015 M1 ~ 2023 M4
+
+    Data : 329
+        >>> training set : 276
+            >>> Date : 1996 M1 ~ 2018 M12
+        >>> testing set : 52
+            >>> Date : 2019 M1 ~ 2023 M4
+'''
+
+
+
+
 
 
 def sifting(data):
@@ -92,8 +115,21 @@ def EMD(data):
 
 
 if __name__== "__main__":
-    # data1, data2, data1_1, data2_2, data3, data4, target, data6 = data_col()
-    data1, target =  lessData()
+    data1, data2, data1_1, data2_2, data3, data4, target, data6 = data_col()
+    
+    # data1 = pd.read_csv('../../OriginalValue(329).csv',encoding='cp950')
+    
+    '''
+    #Split the year from the data
+    data1.drop(' ', axis=1, inplace=True)
+    # print(data1.head(10))
+    data1 = data1.astype('float64')
+    #target set : 總指數 and 總指數(不含土石採取業)
+    target_data1 = data1.iloc[:, 0]
+    '''
+    
+    # data1, target =  lessData()
+    # data = np.array(target)
     data = np.array(target)
     # print(len(data))
     df = np.log(target)
@@ -199,81 +235,93 @@ if __name__== "__main__":
     
 
     
-    for i in range(2, 49):
-        print(f'--------------------------{i} Round')
-        # fast_ica = FastICA(n_components=i)
-        # S_ = fast_ica.fit(IMF_arr).fit_transform(IMF_arr)
-
-        # print(S_.shape)
-        # print(S_[:][0].shape)
-        # print(S_)
-
-
+    # for i in range(2, 22):
+    #     print(f'--------------------------{i} Round')
         
-        n = 276 #number of testing data
-        df_train = df[:][:n].copy()
-        df_test = df[:][n:].copy()
+    
+    # fast_ica = FastICA(n_components=i)
+    # S_ = fast_ica.fit(IMF_arr).fit_transform(IMF_arr)
 
-        df_train = df_train
-        df_test = df_test
-        # print(df_train)
-        print(f'train : {df_train.shape}')
-        print(f'test : {df_test.shape}')
-        
-        # df_test.replace([np.inf, -np.inf], 0, inplace=True)
+    # print(S_.shape)
+    # print(S_[:][0].shape)
+    # print(S_)
 
 
+    
+    n = 397 #number of testing data
+    df_train = df[:][:n].copy()
+    df_test = df[:][n:].copy()
 
-        # Draw ACF PACF graph
-        acf_original = plot_acf(df_train)
-
-        pacf_original = plot_pacf(df_train)
-        # plt.show()
-
-
-
-        from statsmodels.tsa.stattools import adfuller
-
-        adf_test = adfuller(df_train)
-        print(f'p-value: {adf_test[1]}')
-        
-        # df_train_diff = df_train.diff().dropna()
-        # df_train_diff.plot()    
-        
-        # acf_diff = plot_acf(df_train_diff)
-        # pacf_diff = plot_pacf(df_train_diff)
-        # plt.show()
-        
-
-        # auto_arima  = pm.auto_arima(df_train, stepwise=False, seasonal=False)
-        auto_arima  = pm.auto_arima(df_train, stepwise=False, seasonal=True, m = i )
-        # model_fit = auto_arima.fit()
+    df_train = df_train
+    df_test = df_test
+    # print(df_train)
+    print(f'train : {df_train.shape}')
+    print(f'test : {df_test.shape}')
+    
+    df_test.replace([np.inf, -np.inf], 0, inplace=True)
 
 
-        # print(auto_arima)
-        print(auto_arima.summary())
 
-        import matplotlib.pyplot as plt
-        
-        forecast_test_auto = auto_arima.predict(n_periods=len(df_test))
-        
-        print('-'*50)
-        # print(forecast_test_auto)
-        
-        
-        from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error
+    # Draw ACF PACF graph
+    acf_original = plot_acf(df_train)
 
-        mae = mean_absolute_error(df_test, forecast_test_auto)
-        mape = mean_absolute_percentage_error(df_test, forecast_test_auto)
-        rmse = np.sqrt(mean_squared_error(df_test, forecast_test_auto))
-        r2_rec = r2_score(df_test, forecast_test_auto)
+    pacf_original = plot_pacf(df_train)
+    # plt.show()
 
 
-        print(f'mae - auto: {mae}')
-        print(f'mape - auto: {mape}')
-        print(f'rmse - auto: {rmse}')
-        print(f'R2 score : {r2_rec}')
-        
+
+    from statsmodels.tsa.stattools import adfuller
+
+    adf_test = adfuller(df_train)
+    print(f'p-value: {adf_test[1]}')
+    
+    # df_train_diff = df_train.diff().dropna()
+    # df_train_diff.plot()    
+    
+    # acf_diff = plot_acf(df_train_diff)
+    # pacf_diff = plot_pacf(df_train_diff)
+    # plt.show()
+    
+
+    # auto_arima  = pm.auto_arima(df_train, stepwise=False, seasonal=False)
+    auto_arima  = pm.auto_arima(df_train, stepwise=False, seasonal=True, m = 12 )
+    # model_fit = auto_arima.fit()
+    auto_arima.fit(df_train)    
+    
+    # print(auto_arima)
+    
+    print(auto_arima.summary())
+
+    import matplotlib.pyplot as plt
+    
+    forecast_test_auto = auto_arima.predict(n_periods=len(df_test))
+    
+    print('-'*50)
+    # print(forecast_test_auto)
+    
+    forecast_test_auto = pd.DataFrame(forecast_test_auto,index = df_test.index,columns=['Prediction'])
+    
+    concat1 = pd.concat([df_test, forecast_test_auto],axis=1)
+    concat2 = pd.concat([target,forecast_test_auto],axis=1)
+    print(concat1)
+    print(concat2)
+    concat1.plot()
+    concat2.plot()
+    plt.show()
+    
+    from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error
+
+    mae = mean_absolute_error(df_test, forecast_test_auto)
+    mape = mean_absolute_percentage_error(df_test, forecast_test_auto)
+    rmse = np.sqrt(mean_squared_error(df_test, forecast_test_auto))
+    r2_rec = r2_score(df_test, forecast_test_auto)
 
 
-        
+    print(f'mae - auto: {mae}')
+    print(f'mape - auto: {mape}')
+    print(f'rmse - auto: {rmse}')
+    print(f'R2 score : {r2_rec}')
+    
+
+
+    
