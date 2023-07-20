@@ -115,18 +115,19 @@ def EMD(data):
 
 
 if __name__== "__main__":
-    data1, data2, data1_1, data2_2, data3, data4, target, data6 = data_col()
+    # data1, data2, data1_1, data2_2, data3, data4, target, data6 = data_col()
     
-    # data1 = pd.read_csv('../../OriginalValue(329).csv',encoding='cp950')
+    data1 = pd.read_csv('../../OriginalValue(329).csv',encoding='cp950')
     
-    '''
+    
     #Split the year from the data
     data1.drop(' ', axis=1, inplace=True)
     # print(data1.head(10))
     data1 = data1.astype('float64')
     #target set : 總指數 and 總指數(不含土石採取業)
     target_data1 = data1.iloc[:, 0]
-    '''
+    target = target_data1
+    
     
     # data1, target =  lessData()
     # data = np.array(target)
@@ -136,7 +137,7 @@ if __name__== "__main__":
 
     # draw year graph
     
-    df.plot()
+    # df.plot()
     # plt.show()
     
     ''' EMD part (Over)
@@ -233,10 +234,11 @@ if __name__== "__main__":
     # plt.show()
     '''
     
-
-    
-    for i in range(2, 49):
-    #     print(f'--------------------------{i} Round')
+    option = [42, 16, 40 ,35, 48]
+    option_full = [42, 24, 18, 36, 6, 12, 2, 10]
+    test_opt = [2, 3, 4, 5]
+    for i in test_opt:
+        print(f'--------------------------m = {i}')
         
     
     # fast_ica = FastICA(n_components=i)
@@ -248,7 +250,7 @@ if __name__== "__main__":
 
 
     
-        n = 397 #number of testing data
+        n = 276 #number of training data
         df_train = df[:][:n].copy()
         df_test = df[:][n:].copy()
 
@@ -263,9 +265,9 @@ if __name__== "__main__":
 
 
         # Draw ACF PACF graph
-        acf_original = plot_acf(df_train)
+        # acf_original = plot_acf(df_train)
 
-        pacf_original = plot_pacf(df_train)
+        # pacf_original = plot_pacf(df_train)
         # plt.show()
 
 
@@ -284,7 +286,7 @@ if __name__== "__main__":
         
 
         # auto_arima  = pm.auto_arima(df_train, stepwise=False, seasonal=False)
-        auto_arima  = pm.auto_arima(df_train, stepwise=False, seasonal=True, m = 12 )
+        auto_arima  = pm.auto_arima(df_train, stepwise=False, seasonal=True, m = i )
         # model_fit = auto_arima.fit()
         auto_arima.fit(df_train)    
         
@@ -305,9 +307,12 @@ if __name__== "__main__":
         concat2 = pd.concat([target,forecast_test_auto],axis=1)
         # print(concat1)
         # print(concat2)
-        # concat1.plot()
+        
+        concat1.plot()
+        plt.title(f'm = {i} : Test & Prediction')
         # concat2.plot()
-        # plt.show()
+        # plt.title(f'm = {i} : Target & Prediction')
+        
         
         from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error
 
@@ -322,6 +327,6 @@ if __name__== "__main__":
         print(f'rmse - auto: {rmse}')
         print(f'R2 score : {r2_rec}')
         
-
+    plt.show()
 
         

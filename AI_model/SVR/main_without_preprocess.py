@@ -37,7 +37,16 @@ if __name__ == '__main__':
     # Data loading
     data1, data2, data1_1, data2_2, data3, data4, data5, data6 = data_col()
 
-
+    # data1 = pd.read_csv('../../OriginalValue(329).csv',encoding='cp950')
+    
+    '''
+    #Split the year from the data
+    data1.drop(' ', axis=1, inplace=True)
+    # print(data1.head(10))
+    data1 = data1.astype('float64')
+    #target set : 總指數 and 總指數(不含土石採取業)
+    target_data1 = data1.iloc[:, 0]
+    '''
     #Data Re-Organize
     # print(data2)
     # print(data3)
@@ -64,7 +73,7 @@ if __name__ == '__main__':
     # print(target_Year.shape) 
 
     #Data prepare
-    x_train, x_test, y_train, y_test = train_test_split(data1_1ar, target_ori, test_size=0.2)
+    x_train, x_test, y_train, y_test = train_test_split(data1_1, data5, test_size=0.2)
     
 
     #SVR model create
@@ -75,7 +84,7 @@ if __name__ == '__main__':
     y_hat=polyModel.predict(x_test)
     '''
     
-    
+    '''
     #for finding the svr best score
     score_con_train = []
     score_con_test = []
@@ -134,6 +143,7 @@ if __name__ == '__main__':
     
     '''
     
+    
     #GridSearch
     param = {'kernel' : ('rbf', 'sigmoid'),'C' : range(1, 29),'degree' : [3,8],'gamma' : ('auto','scale')}
 
@@ -150,12 +160,13 @@ if __name__ == '__main__':
     mse_score = mse(y_test, y_hat)
     print("MSE_Score : ", mse_score)
     print("RMSE_Score : ", np.sqrt(mse_score))
-    
+
 
     print(" Results from Grid Search " )
     print("\n The best estimator across ALL searched params:\n",grid_search.best_estimator_)
     print("\n The best score across ALL searched params:\n",grid_search.best_score_)
     print("\n The best parameters across ALL searched params:\n",grid_search.best_params_)
+    
     #Draw the result graph
     r = len(x_test) + 1
     plt.plot(np.arange(1,r), y_hat, 'go-', label="predict")
@@ -164,7 +175,7 @@ if __name__ == '__main__':
     end = time.time()
     print("執行時間：%f 秒" % (end - start))
     plt.show()
-    '''
+    
     
 
 
