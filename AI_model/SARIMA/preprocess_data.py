@@ -11,6 +11,7 @@ from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tsa.seasonal import seasonal_decompose
 import pandas as pd
+from statsmodels.stats.diagnostic import acorr_ljungbox as lb_test
 
 sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
 
@@ -21,30 +22,36 @@ from data_process import data_col
 def stableCheck(origin, time_diff):
     fig = plt.figure(figsize=(12, 8))
     orig = plt.plot(origin, color='blue', label='Original')
-    # 绘图
-    fig = plt.figure(figsize=(12, 8))
-    orig = plt.plot(origin, color='blue', label='Original')
-    diff = plt.plot(time_diff, color='red', label='Time Series diff')
+    diff = plt.plot(time_diff, color='red', label='After Differencing')
     plt.legend(loc='best')
-    plt.title('Rolling Mean & Standard Deviation')
+    plt.title('Before & After Differencing')
+    plt.show()
+    
+def whiteNoiseCheck(data):
+    
+    result = lb_test(data, lags=1)
+    # temp = result[1]
+    print('白噪聲檢驗结果：', result)
+    # 如果temp小于0.05，则可以以95%的概率拒绝原假设，认为该序列为非白噪声序列；否则，为白噪声序列，认为没有分析意义
+    print(result.shape)
+    return result
 
-
-
-if __name__== "__main__":
+# if __name__== "__main__":
+def newdata_generate(opt):
     # data1, data2, data1_1, data2_2, data3, data4, data5, data6 = data_col()
-    data3 = pd.DataFrame(pd.read_csv('OriginalValue_copy.csv',encoding='cp950', index_col=0))
+    data3 = pd.DataFrame(pd.read_csv('..\..\OriginalValue_copy.csv',encoding='cp950', index_col=0))
     # print(data3.head())
     data3.index = pd.to_datetime(data3.index)
     data3_og = data3['總指數(不含土石採取業)']
     # print(data3.head(10))
     
     
-    data_329 = pd.DataFrame(pd.read_csv('OriginalValue(329)_copy.csv',encoding='cp950', index_col=0))
+    data_329 = pd.DataFrame(pd.read_csv('..\..\OriginalValue(329)_copy.csv',encoding='cp950', index_col=0))
     # print(data_329.head())
     data_329.index = pd.to_datetime(data_329.index)
     # print(data_329.head(10))
     data_329_og = data_329['總指數']
-    print(data_329_og.head(10))
+    # print(data_329_og.head(10))
     
     
     '''
@@ -57,7 +64,7 @@ if __name__== "__main__":
     plt.show()
     '''
 
-
+    '''
     from statsmodels.tsa.stattools import adfuller   
 
     print('Results of Dickey-Fuller Test:')
@@ -68,12 +75,28 @@ if __name__== "__main__":
         dfoutput['Critical Value (%s)' % key] = value
     print('ADF檢驗結果:')
     print(dfoutput)
+    '''
     
+    #opt = 1 => less data
+    #opt = 2 => full data => num : 329
     
-    time_series_diff1 = data3_og.diff(1).dropna()
-    time_series_diff2 = time_series_diff1.diff(12).dropna()
-
-    print(time_series_diff2.head(10))
+    if opt == 1:
+        time_series_diff1 = data3_og.diff(1)
+    elif opt == 2:
+        time_series_diff1 = data_329_og.diff(1)
+        
+    # print(time_series_diff1[time_series_diff1.isnull().values==True], time_series_diff1.shape)
+    time_series_diff1 = time_series_diff1.dropna()
+    
+    # print('-'*100)
+    time_series_diff2 = time_series_diff1.diff(12)
+    # print(time_series_diff2[time_series_diff2.isnull().values==True], time_series_diff2.shape)
+    
+    time_series_diff2 = time_series_diff2.dropna()
+    # print(time_series_diff2)
+    
+    return time_series_diff2
+    '''
     print('-'*100)
     print('Results of Dickey-Fuller Test:')
     dftest = adfuller(time_series_diff2, autolag='AIC')
@@ -84,10 +107,12 @@ if __name__== "__main__":
     print('ADF檢驗結果:')
     print(dfoutput)
     
+    stableCheck(data_329_og ,time_series_diff2)
     
+    print('-'*100)
     
-    
-    
+    ifwhiteNoise = whiteNoiseCheck(time_series_diff2)
+    '''
     
     
     

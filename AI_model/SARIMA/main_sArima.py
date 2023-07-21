@@ -21,7 +21,8 @@ sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
 
 sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
 from data_process import data_col#, lessData
-
+# sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay_second\SmartComputing_Essay\AI_model\ARIMA')
+from preprocess_data import newdata_generate
 
 # -----------Training & Testing Data prepare:
 '''
@@ -140,6 +141,9 @@ if __name__== "__main__":
     # df.plot()
     # plt.show()
     
+    processed_data = newdata_generate(1)
+    
+    
     ''' EMD part (Over)
     #EMD Part 
 
@@ -237,7 +241,7 @@ if __name__== "__main__":
     option = [42, 16, 40 ,35, 48]
     option_full = [42, 24, 18, 36, 6, 12, 2, 10]
     test_opt = [2, 3, 4, 5]
-    for i in range(1):
+    for i in range(2, 48):
         print(f'--------------------------m = {i}')
         
     
@@ -250,9 +254,9 @@ if __name__== "__main__":
 
 
     
-        n = 397 #number of training data
-        df_train = df[:][:n].copy()
-        df_test = df[:][n:].copy()
+        n = 393 #number of training data
+        df_train = processed_data[:][:n].copy()
+        df_test = processed_data[:][n:].copy()
 
         df_train = df_train
         df_test = df_test
@@ -263,31 +267,33 @@ if __name__== "__main__":
         df_test.replace([np.inf, -np.inf], 0, inplace=True)
 
 
-
+        '''
         # Draw ACF PACF graph
-        # acf_original = plot_acf(df_train)
+        acf_original = plot_acf(df_train)
 
-        # pacf_original = plot_pacf(df_train)
-        # plt.show()
-
-
-
-        from statsmodels.tsa.stattools import adfuller
-
-        adf_test = adfuller(df_train)
-        print(f'p-value: {adf_test[1]}')
+        pacf_original = plot_pacf(df_train)
+        plt.show()
         
-        # df_train_diff = df_train.diff().dropna()
-        # df_train_diff.plot()    
+        df_train_diff = df_train.diff().dropna()
+        df_train_diff.plot()    
         
-        # acf_diff = plot_acf(df_train_diff)
-        # pacf_diff = plot_pacf(df_train_diff)
-        # plt.show()
-        
+        acf_diff = plot_acf(df_train_diff)
+        pacf_diff = plot_pacf(df_train_diff)
+        plt.show()
+        '''
 
         # auto_arima  = pm.auto_arima(df_train, stepwise=False, seasonal=False)
-        auto_arima  = pm.auto_arima(df_train, start_p=1, start_q=1,
-                           max_p=3, max_q=3, max_d=3,stepwise=False, seasonal=False)
+        auto_arima  = pm.auto_arima(df_train, start_p=0,   # p最小值
+                                 start_q=0,   
+                                 test='adf',  #d
+                                 max_p=5,     
+                                 max_q=5,
+                                 stepwise=False, 
+                                 seasonal=True, 
+                                 m = i,
+                                 d=None,
+                                 start_P=0, D=1, 
+                                 error_action='ignore')
         # model_fit = auto_arima.fit()
         auto_arima.fit(df_train)    
         
@@ -328,6 +334,6 @@ if __name__== "__main__":
         print(f'rmse - auto: {rmse}')
         print(f'R2 score : {r2_rec}')
         
-    plt.show()
+    # plt.show()
 
         
