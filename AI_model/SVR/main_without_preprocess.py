@@ -73,7 +73,29 @@ if __name__ == '__main__':
     # print(target_Year.shape) 
 
     #Data prepare
-    x_train, x_test, y_train, y_test = train_test_split(data1_1, data5, test_size=0.2)
+    # -----------Training & Testing Data prepare:
+    '''
+    ----------DataSet split
+    Data : 497
+        >>> training set : 397
+            >>> Date : 1982 M1 ~ 2014 M12
+        >>> testing set : 100
+            >>> Date : 2015 M1 ~ 2023 M4
+
+    Data : 329
+        >>> training set : 276
+            >>> Date : 1996 M1 ~ 2018 M12
+        >>> testing set : 52
+            >>> Date : 2019 M1 ~ 2023 M4
+    '''
+    n = 276 # Number of Training Data
+    x_train = data1_1[:][:n].copy()
+    x_test = data1_1[:][n:].copy()
+    # print(x_train)  
+    
+    y_train = data5[:][:n].copy()
+    y_test = data5[:][n:].copy()
+    # x_train, x_test, y_train, y_test = train_test_split(data1_1, data5, test_size=0.2)
     
 
     #SVR model create

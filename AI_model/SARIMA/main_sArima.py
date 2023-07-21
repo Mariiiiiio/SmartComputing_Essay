@@ -15,7 +15,7 @@ from scipy.signal import argrelextrema
 import scipy.interpolate as spi
 import pandas as pd
 from chart_studio.plotly import plot_mpl
-
+from statsmodels.tsa.seasonal import seasonal_decompose
 
 sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
 
@@ -115,11 +115,11 @@ def EMD(data):
 
 
 if __name__== "__main__":
-    # data1, data2, data1_1, data2_2, data3, data4, target, data6 = data_col()
+    data1, data2, data1_1, data2_2, data3, data4, target, data6 = data_col()
     
-    data1 = pd.read_csv('../../OriginalValue(329).csv',encoding='cp950')
+    # data1 = pd.read_csv('../../OriginalValue(329).csv',encoding='cp950')
     
-    
+    '''
     #Split the year from the data
     data1.drop(' ', axis=1, inplace=True)
     # print(data1.head(10))
@@ -127,7 +127,7 @@ if __name__== "__main__":
     #target set : 總指數 and 總指數(不含土石採取業)
     target_data1 = data1.iloc[:, 0]
     target = target_data1
-    
+    '''
     
     # data1, target =  lessData()
     # data = np.array(target)
@@ -237,7 +237,7 @@ if __name__== "__main__":
     option = [42, 16, 40 ,35, 48]
     option_full = [42, 24, 18, 36, 6, 12, 2, 10]
     test_opt = [2, 3, 4, 5]
-    for i in test_opt:
+    for i in range(1):
         print(f'--------------------------m = {i}')
         
     
@@ -250,7 +250,7 @@ if __name__== "__main__":
 
 
     
-        n = 276 #number of training data
+        n = 397 #number of training data
         df_train = df[:][:n].copy()
         df_test = df[:][n:].copy()
 
@@ -286,7 +286,8 @@ if __name__== "__main__":
         
 
         # auto_arima  = pm.auto_arima(df_train, stepwise=False, seasonal=False)
-        auto_arima  = pm.auto_arima(df_train, stepwise=False, seasonal=True, m = i )
+        auto_arima  = pm.auto_arima(df_train, start_p=1, start_q=1,
+                           max_p=3, max_q=3, max_d=3,stepwise=False, seasonal=False)
         # model_fit = auto_arima.fit()
         auto_arima.fit(df_train)    
         

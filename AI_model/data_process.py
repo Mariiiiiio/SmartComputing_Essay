@@ -1,13 +1,14 @@
 import pandas as pd 
 import numpy as np
 
+
 def data_col():
-    data1 = pd.read_csv('/Users/mariio/專題/論文專題/OriginalValue.csv', encoding='cp950')
-    data2 = pd.read_csv('/Users/mariio/專題/論文專題/YearsRate.csv', encoding='cp950')
+    # data1 = pd.read_csv('/Users/mariio/專題/論文專題/OriginalValue.csv', encoding='cp950')
+    # data2 = pd.read_csv('/Users/mariio/專題/論文專題/YearsRate.csv', encoding='cp950')
 
     # data1 = pd.read_csv('..\OriginalValue.csv',encoding='cp950')
     # data2 = pd.read_csv('..\YearsRate.csv',encoding='cp950')
-
+    
     col = ['礦業及土石採取業', '製造業', '金屬機電工業', '資訊電子工業',
         '化學工業', '民生工業', '電力及燃氣供應業', '用水供應業']
     target_col = ['總指數', '總指數(不含土石採取業)']
@@ -31,11 +32,12 @@ def data_col():
     data1 = data1.astype('float64')
     data2 = data2.astype('float64')
 
-
+    temp_con = pd.to_datetime(data1)
+    print(temp_con['總指數(不含土石採取業)'])
     #target set : 總指數 and 總指數(不含土石採取業)
     target_data1 = data1.iloc[:, 0]
     target_data2 = data2.iloc[:, 0]
-    target_data1_without_one_ele = data1['總指數(不含土石採取業)']
+    target_data1_without_one_ele = temp_con['總指數(不含土石採取業)']
     target_data2_without_one_ele = data2['總指數(不含土石採取業)']
     # print(target_data1.head(10))
     # print(target_data2.head(10))
@@ -91,6 +93,6 @@ def lessData():
     return data1, target_data1
 
 if __name__ == '__main__':
-    
+    data_col()
     # data_col_lessData()
     pass
