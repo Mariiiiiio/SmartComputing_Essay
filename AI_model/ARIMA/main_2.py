@@ -18,25 +18,36 @@ sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\
 
 from data_process import data_col
 
+def stableCheck(origin, time_diff):
+    fig = plt.figure(figsize=(12, 8))
+    orig = plt.plot(origin, color='blue', label='Original')
+    # 绘图
+    fig = plt.figure(figsize=(12, 8))
+    orig = plt.plot(origin, color='blue', label='Original')
+    diff = plt.plot(time_diff, color='red', label='Time Series diff')
+    plt.legend(loc='best')
+    plt.title('Rolling Mean & Standard Deviation')
+
+
 
 if __name__== "__main__":
-    data1, data2, data1_1, data2_2, data3, data4, data5, data6 = data_col()
-    data3 = pd.DataFrame(pd.read_csv('..\..\OriginalValue_copy.csv',encoding='cp950', index_col=0))
+    # data1, data2, data1_1, data2_2, data3, data4, data5, data6 = data_col()
+    data3 = pd.DataFrame(pd.read_csv('OriginalValue_copy.csv',encoding='cp950', index_col=0))
     # print(data3.head())
     data3.index = pd.to_datetime(data3.index)
-    
+    data3_og = data3['總指數(不含土石採取業)']
     # print(data3.head(10))
     
     
-    data_329 = pd.DataFrame(pd.read_csv('..\..\OriginalValue(329)_copy.csv',encoding='cp950', index_col=0))
+    data_329 = pd.DataFrame(pd.read_csv('OriginalValue(329)_copy.csv',encoding='cp950', index_col=0))
     # print(data_329.head())
     data_329.index = pd.to_datetime(data_329.index)
     # print(data_329.head(10))
-
+    data_329_og = data_329['總指數']
+    print(data_329_og.head(10))
     
     
-    
-        
+    '''
     from chart_studio.plotly import plot_mpl
     from plotly.offline import plot_mpl
     result = seasonal_decompose(data_329['總指數'], model='multiplicative')
@@ -44,11 +55,34 @@ if __name__== "__main__":
     # result = seasonal_decompose(data, model=’multiplicative’)
     result.plot()
     plt.show()
+    '''
+
+
+    from statsmodels.tsa.stattools import adfuller   
+
+    print('Results of Dickey-Fuller Test:')
+    dftest = adfuller(data3_og, autolag='AIC')
+    # 对检验结果进行语义描述
+    dfoutput = pd.Series(dftest[0:4], index=['Test Statistic', 'p-value', '#Lags Used', 'Number of Observations Used'])
+    for key, value in dftest[4].items():
+        dfoutput['Critical Value (%s)' % key] = value
+    print('ADF檢驗結果:')
+    print(dfoutput)
     
     
-    
-    
-    
+    time_series_diff1 = data3_og.diff(1).dropna()
+    time_series_diff2 = time_series_diff1.diff(12).dropna()
+
+    print(time_series_diff2.head(10))
+    print('-'*100)
+    print('Results of Dickey-Fuller Test:')
+    dftest = adfuller(time_series_diff2, autolag='AIC')
+    # 对检验结果进行语义描述
+    dfoutput = pd.Series(dftest[0:4], index=['Test Statistic', 'p-value', '#Lags Used', 'Number of Observations Used'])
+    for key, value in dftest[4].items():
+        dfoutput['Critical Value (%s)' % key] = value
+    print('ADF檢驗結果:')
+    print(dfoutput)
     
     
     
