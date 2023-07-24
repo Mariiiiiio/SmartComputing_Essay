@@ -2,6 +2,9 @@ from sklearn.decomposition import PCA
 from sklearn.svm import SVR
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_absolute_error as mse
+from sklearn.metrics import mean_absolute_error as mae
+from sklearn.metrics import mean_absolute_percentage_error as mape
+import math
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,9 +14,9 @@ import sys
 plt.rcParams["font.sans-serif"]=["SimHei"] #设置字体
 plt.rcParams["axes.unicode_minus"]=False
 
-# sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
+sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
 sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
-from data_process import data_col, lessData
+from data_process import data_col
 
 
 # Documents : 
@@ -164,7 +167,7 @@ def Call_Model_PCA(data, target):
         for j in range(1,50):
             
             # print(f'C = {j} ..........')
-            svr_model = SVR(C= j,kernel='poly', degree= 3, gamma='auto', max_iter=-1)
+            svr_model = SVR(C= j,kernel='rbf', degree= 3, gamma='auto', max_iter=-1)
             svr_model.fit(x_train, y_train)
             y_hat = svr_model.predict(x_test)
             #Score showing
@@ -178,18 +181,25 @@ def Call_Model_PCA(data, target):
                 mse_rec = mse_score
                 count = j
                 r2_rec = r2_score(y_test, y_hat)
+                MAE_score = mae(y_test, y_hat)
+                MAPE_score = mape(y_test, y_hat)
                 test_sc_num = svr_model.score(x_test, y_test)
                 train_sc_num = svr_model.score(x_train,y_train)
             train_sc.append(svr_model.score(x_train, y_train))
             test_sc.append(svr_model.score(x_test, y_test))
         draw_graph(train_sc, test_sc, i)
         mse_fig.append(mse_rec)
-        param_record[i] = {'C': count, 
-                            'best_mse_score': mse_rec, 
-                            'R2_score': r2_rec, 
-                            'Training score' : train_sc_num, 
-                            'Testing score' : test_sc_num}
-            
+        # param_record[i] = {'C': count, 
+        #                     'best_mse_score': mse_rec, 
+        #                     'R2_score': r2_rec, 
+        #                     'Training score' : train_sc_num, 
+        #                     'Testing score' : test_sc_num}
+        param_record[i] = {            
+                'C': count,
+                'best_rmse_score': math.sqrt(mse_rec), 
+                'MAE Score' :  MAE_score,
+                'MAPE Score' : MAPE_score,
+            }
         # plt.plot(range(len(train_sc)), train_sc, 'go-', label="Train Score")
         # plt.plot(range(len(test_sc)), test_sc, 'co-', label="Test Score")
 
@@ -235,14 +245,14 @@ def Call_497data():
     #Target-setting-To array
     target_ori = np.array(data5)
     # print(print(data1_1.head(10)))
-    # data1_1.drop('製造業', axis=1, inplace=True)
+    data1_1.drop('製造業', axis=1, inplace=True)
     # print(data1_1.columns)
     print(f'Data number : {data1_1.shape}, target number : {target_ori.shape}')
     Call_Model_PCA(data1_1, target_ori)
 
 
 def Call_329data():
-    data1 = pd.read_csv('OriginalValue(329).csv',encoding='cp950')
+    data1 = pd.read_csv('..\..\OriginalValue(329).csv',encoding='cp950')
     
     
 

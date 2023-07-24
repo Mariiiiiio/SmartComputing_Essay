@@ -9,10 +9,12 @@ import pandas as pd
 from sklearn.svm import SVR
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_absolute_error as mse
-
+from sklearn.metrics import mean_absolute_error as mae
+from sklearn.metrics import mean_absolute_percentage_error as mape
+import math
 sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
 
-# sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
+sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows。
 
 from data_process import data_col
 
@@ -77,7 +79,7 @@ def Call_Model_ICA(data, target):
         n = 276 # Number of Training Data
         x_train = S_[:][:n].copy()
         x_test = S_[:][n:].copy()
-        print(x_train)  
+        # print(x_train)  
         
         y_train = target[:][:n].copy()
         y_test = target[:][n:].copy()
@@ -99,7 +101,7 @@ def Call_Model_ICA(data, target):
         for j in range(1,50):
 
             # print(f'C = {j} ..........')
-            svr_model = SVR(C= j,kernel='poly', degree= 100, gamma='auto', max_iter=-1)
+            svr_model = SVR(C= j,kernel='rbf', degree= 100, gamma='auto', max_iter=-1)
             svr_model.fit(x_train, y_train)
 
             y_hat = svr_model.predict(x_test)
@@ -114,6 +116,8 @@ def Call_Model_ICA(data, target):
             if mse_score < mse_rec:
                 mse_rec = mse_score
                 count = j
+                MAE_score = mae(y_test, y_hat)
+                MAPE_score = mape(y_test, y_hat)
                 r2_rec = r2_score(y_test, y_hat)
                 test_sc_num = svr_model.score(x_test, y_test)
                 train_sc_num = svr_model.score(x_train,y_train)
@@ -123,12 +127,18 @@ def Call_Model_ICA(data, target):
 
         draw_graph(train_sc, test_sc, i)
         mse_fig.append(mse_rec)
-        param_record[i] = {'C': count, 
-                           'best_mse_score': mse_rec, 
-                           'R2_score': r2_rec, 
-                           'Training score' : train_sc_num, 
-                           'Testing score' : test_sc_num}
-        
+        param_record[i] = {            
+                'C': count,
+                'best_rmse_score': math.sqrt(mse_rec), 
+                'MAE Score' :  MAE_score,
+                'MAPE Score' : MAPE_score,
+            }
+        '''
+                
+                'R2_score': r2_rec, 
+                'Training score' : train_sc_num, 
+                'Testing score' : test_sc_num
+        '''
     # plt.plot(range(len(train_sc)), train_sc, 'go-', label="Train Score")
     # plt.plot(range(len(test_sc)), test_sc, 'co-', label="Test Score")
 
@@ -170,14 +180,14 @@ def Call_497data():
     # 年增率-變數-轉換矩陣型態
     #Target-setting-To array
     target_ori = np.array(data5)
-    # data1_1.drop('製造業', axis=1, inplace=True)
-    # print(data1_1.columns)
+    data1_1.drop('製造業', axis=1, inplace=True)
+    print(data1_1.columns)
     print(f'Data number : {data1_1.shape}, target number : {target_ori.shape}')
     Call_Model_ICA(data1_1, target_ori)
 
 
 def Call_329data():
-    data1 = pd.read_csv('OriginalValue(329).csv',encoding='cp950')
+    data1 = pd.read_csv('..\..\OriginalValue(329).csv',encoding='cp950')
     
     
 
@@ -205,8 +215,8 @@ if __name__ == '__main__':
     print('-'*50+'329')
     Call_329data()
 
-    print('-'*50+'497')
-    Call_497data()
+    # print('-'*50+'497')
+    # Call_497data()
 
 
 

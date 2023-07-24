@@ -238,10 +238,10 @@ if __name__== "__main__":
     # plt.show()
     '''
     
-    option = [42, 16, 40 ,35, 48]
-    option_full = [42, 24, 18, 36, 6, 12, 2, 10]
-    test_opt = [2, 3, 4, 5]
-    for i in range(2, 48):
+    opt1 = [44, 48, 32, 42, 47] 
+    opt2 = [12]
+    # for i in range(48, 49):
+    for i in opt2:
         print(f'--------------------------m = {i}')
         
     
@@ -334,6 +334,6 @@ if __name__== "__main__":
         print(f'rmse - auto: {rmse}')
         print(f'R2 score : {r2_rec}')
         
-    # plt.show()
+    plt.show()
 
         

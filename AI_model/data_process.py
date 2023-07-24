@@ -3,8 +3,8 @@ import numpy as np
 
 
 def data_col():
-    # data1 = pd.read_csv('/Users/mariio/專題/論文專題/OriginalValue.csv', encoding='cp950')
-    # data2 = pd.read_csv('/Users/mariio/專題/論文專題/YearsRate.csv', encoding='cp950')
+    data1 = pd.read_csv('/Users/mariio/專題/論文專題/OriginalValue.csv', encoding='cp950')
+    data2 = pd.read_csv('/Users/mariio/專題/論文專題/YearsRate.csv', encoding='cp950')
 
     # data1 = pd.read_csv('..\OriginalValue.csv',encoding='cp950')
     # data2 = pd.read_csv('..\YearsRate.csv',encoding='cp950')
@@ -65,7 +65,7 @@ def data_col():
 
 def lessData():
     #for mac
-    data1 = pd.read_csv('/Users/mariio/專題/論文專題/OriginalValue(329).csv', encoding='cp950')
+    # data1 = pd.read_csv('/Users/mariio/專題/論文專題/OriginalValue(329).csv', encoding='cp950')
     
     #for windows
     # data1 = pd.read_csv('..\OriginalValue(329).csv',encoding='cp950')
@@ -93,6 +93,6 @@ def lessData():
     return data1, target_data1
 
 if __name__ == '__main__':
-    data_col()
+    # data_col()
     # data_col_lessData()
     pass
