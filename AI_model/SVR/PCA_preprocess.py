@@ -188,7 +188,7 @@ def Call_Model_PCA(data, target):
             train_sc.append(svr_model.score(x_train, y_train))
             test_sc.append(svr_model.score(x_test, y_test))
         draw_graph(train_sc, test_sc, i)
-        mse_fig.append(mse_rec)
+        mse_fig.append(math.sqrt(mse_rec))
         # param_record[i] = {'C': count, 
         #                     'best_mse_score': mse_rec, 
         #                     'R2_score': r2_rec, 
@@ -219,10 +219,10 @@ def Call_Model_PCA(data, target):
 
     #--------------Model result
     print(param_record)
-    plt.title('SVR + PCA ')
+    plt.title('SVR + PCA : 資料集A2')
     plt.plot(range(1, len(data.columns)+1), mse_fig, 'co-', label="Train Score")
     plt.xlabel('pca number')
-    plt.ylabel('MSE value')
+    plt.ylabel('RMSE value')
     plt.show()
 
 
@@ -277,7 +277,7 @@ def Call_329data():
 if __name__ == '__main__':
     print('-'*50+'329')
     Call_329data()
-
+    
     # print('-'*50+'497')
     # Call_497data()
     

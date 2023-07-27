@@ -17,7 +17,8 @@ sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
 sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows。
 
 from data_process import data_col
-
+plt.rcParams["font.sans-serif"]=["SimHei"] #设置字体
+plt.rcParams["axes.unicode_minus"]=False
 
 ''' Documents : 
     data1 : 原始值-變數
@@ -76,7 +77,7 @@ def Call_Model_ICA(data, target):
             >>> testing set : 52
                 >>> Date : 2019 M1 ~ 2023 M4
         '''
-        n = 276 # Number of Training Data
+        n = 397 # Number of Training Data
         x_train = S_[:][:n].copy()
         x_test = S_[:][n:].copy()
         # print(x_train)  
@@ -126,7 +127,7 @@ def Call_Model_ICA(data, target):
             test_sc.append(svr_model.score(x_test, y_test))
 
         draw_graph(train_sc, test_sc, i)
-        mse_fig.append(mse_rec)
+        mse_fig.append(math.sqrt(mse_rec))
         param_record[i] = {            
                 'C': count,
                 'best_rmse_score': math.sqrt(mse_rec), 
@@ -159,10 +160,10 @@ def Call_Model_ICA(data, target):
 
     print(param_record)
     
-    plt.title('SVR + ICA ')
+    plt.title('SVR + ICA : 資料集A2')
     plt.plot(range(1, len(data.columns)+1), mse_fig, 'co-', label="Train Score")
     plt.xlabel('ICA number')
-    plt.ylabel('MSE value')
+    plt.ylabel('RMSE value')
     plt.show()
 
 
@@ -212,11 +213,11 @@ def Call_329data():
 
 
 if __name__ == '__main__':
-    print('-'*50+'329')
-    Call_329data()
+    # print('-'*50+'329')
+    # Call_329data()
 
-    # print('-'*50+'497')
-    # Call_497data()
+    print('-'*50+'497')
+    Call_497data()
 
 
 
