@@ -1,5 +1,6 @@
 from sklearn.decomposition import PCA
 from sklearn.svm import SVR
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_absolute_error as mse
 from sklearn.metrics import mean_absolute_error as mae
@@ -10,20 +11,202 @@ import matplotlib.pyplot as plt
 import numpy as np
 import time
 import sys
-
+from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.stats.diagnostic import acorr_ljungbox as lb_test
+from statsmodels.tsa.stattools import adfuller 
+import pmdarima as pm
 plt.rcParams["font.sans-serif"]=["SimHei"] #设置字体
 plt.rcParams["axes.unicode_minus"]=False
 
 sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay\AI_model') #for windows
-sys.path.append('/Users/mariio/專題/論文專題/AI_model')  #for mac
+sys.path.append('/Users/mariio/專題/論文專題')  #for mac
+sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay')
+
 # sys.path.append('/Users/mariio/專題/論文專題')  #for mac
 
 from AI_model.data_process import data_col
+def stableCheck(origin, time_diff):
+    fig = plt.figure(figsize=(12, 8))
+    orig = plt.plot(origin, color='blue', label='Original')
+    diff = plt.plot(time_diff, color='red', label='After Differencing')
+    plt.legend(loc='best')
+    plt.title('Before & After Differencing')
+    plt.show()
+
+def  draw_graph(train_data, test_data , round_num):
+
+    plt.subplot(2, 4, round_num)
+    plt.title(f'ICA = {round_num}')
+    plt.plot(range(1, 50), train_data, 'co-', label = f'train data', markersize=4)
+    plt.plot(range(1, 50), test_data, 'go-', label = f'test data', markersize=4)
+    plt.legend()
+    plt.xlabel("C number")
+    plt.ylabel("Value")
+    # plt.show()
+def whiteNoiseCheck(data):
+    
+    result = lb_test(data, lags=1)
+    # temp = result[1]
+    print('白噪聲檢驗结果：', result)
+    
+    # 如果temp小於0.05，則可以以95%的概率拒絕虛無假設，認為該序列為非白噪聲序列；否則，為白噪聲序列，將會沒有分析意義
+    # print(result.shape)
+    
+    
+def ARIMA_preVal(data, ind_name):
+    
+    '''
+    In this part, i annotate all the print line because of the finsh of testing
+    '''
+    
+    
+    # from chart_studio.plotly import plot_mpl
+    # from plotly.offline import plot_mpl
+    result = seasonal_decompose(data, model='multiplicative')
+    # result = seasonal_decompose(data3['總指數(不含土石採取業)'], model='multiplicative')
+    # result = seasonal_decompose(data, model=’multiplicative’)
+    
+    # result.plot()
+    # plt.show()
+    
+    '''
+
+    '''
+      
+
+    # print('--------First Test - Results of Dickey-Fuller Test:')
+    dftest = adfuller(data, autolag='AIC')
+    # 对检验结果进行语义描述
+    dfoutput = pd.Series(dftest[0:4], index=['Test Statistic', 'p-value', '#Lags Used', 'Number of Observations Used'])
+    for key, value in dftest[4].items():
+        dfoutput['Critical Value (%s)' % key] = value
+    #print('ADF檢驗結果:')
+    #print(dfoutput)
+    time_series_diff1 = data.diff(1)
+    # print('Nan Result : ', end="")
+    # print(time_series_diff1[time_series_diff1.isnull().values==True], time_series_diff1.shape)
+    # print()
+    time_series_diff1 = time_series_diff1.dropna()
+    
+    # print('-'*100)
+    '''
+    for i in range(1, 24):
+        print('-'*100+'週期設定:', end="")
+        print(i, ':', ind_name)
+        time_series_diff2 = time_series_diff1.diff(i)
+        # print(time_series_diff2[time_series_diff2.isnull().values==True], time_series_diff2.shape)
+        
+        time_series_diff2 = time_series_diff2.dropna()
+        # print(time_series_diff2)
+        second_adf_test(time_series_diff2, data)
+        
+        print('---White Noise Test:')
+        whiteNoiseCheck(time_series_diff2)
+        
+        # print('-'*100)
+    '''
+    return time_series_diff1
+def second_adf_test(data, orig):
+    
+    # stableCheck(orig, data)
+    
+    print('Second Test - Results of Dickey-Fuller Test:')
+    dftest = adfuller(data, autolag='AIC')
+    # 对检验结果进行语义描述
+    dfoutput = pd.Series(dftest[0:4], index=['Test Statistic', 'p-value', '#Lags Used', 'Number of Observations Used'])
+    for key, value in dftest[4].items():
+        dfoutput['Critical Value (%s)' % key] = value
+    print('ADF檢驗結果:')
+    print(dfoutput)
+
 
 
 # Documents : 
+def call_ARIMA_model():
+    data_target, data_mine, data_ele_gas, data_water, data_tech = Call_329data()
+    cont_nm = [data_mine, data_ele_gas, data_tech]
+    
+    Industry_name = ['礦業及土石採取業', '電力及燃氣供應業', "資訊電子工業"]
+    
+    cnt = 0 
+    prediction_value_temp = pd.DataFrame(columns=[])
+    
+    for i in cont_nm:
+        data = 0
+        data = ARIMA_preVal(i, Industry_name[cnt])
+        
+        
+        
+        print(data.shape)
+        print()
+        print(f'Model Training : {Industry_name[cnt]}')
+        n = 251 #number of training data
+        
+        df_train = data[:][:n].copy()
+        df_test = data[:][n:].copy()
+        
+        print(f'train : {df_train.shape}')
+        print(f'test : {df_test.shape}')
+
+        df_test.replace([np.inf, -np.inf], 0, inplace=True)
+        
+        
+        
+        # auto_arima  = pm.auto_arima(df_train, stepwise=False, seasonal=False)
+        auto_arima  = pm.auto_arima(df_train, start_p=0,   # p最小值
+                                start_q=0,   
+                                test='adf',  #d
+                                max_p=5,     
+                                max_q=5,                                 
+                                stepwise=False, 
+                                seasonal=True,   
+                                m = 12,                               
+                                error_action='ignore')
+        
+        # model_fit = auto_arima.fit()
+        auto_arima.fit(df_train)    
+        
+        # print(auto_arima)
+        
+        print(auto_arima.summary())
+
+        import matplotlib.pyplot as plt
+        
+        forecast_test_auto = auto_arima.predict(n_periods=len(df_test))
+        print(forecast_test_auto)
+        
+        
+        prediction_value_temp.insert(cnt, column=Industry_name[cnt], value=forecast_test_auto)
+        
+        
+        print('-'*50)
+        # print(forecast_test_auto)
+        
+        forecast_test_auto = pd.DataFrame(forecast_test_auto,index = df_test.index,columns=['Prediction'])
+        
+        concat1 = pd.concat([df_test, forecast_test_auto],axis=1).plot()
+        plt.title(f'{Industry_name[cnt]} | 預測效果展示圖')
+        # concat2 = pd.concat([target,forecast_test_auto],axis=1)
+        
+        from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error
+
+        mae = mean_absolute_error(df_test, forecast_test_auto)
+        mape = mean_absolute_percentage_error(df_test, forecast_test_auto)
+        rmse = np.sqrt(mean_squared_error(df_test, forecast_test_auto))
+        r2_rec = r2_score(df_test, forecast_test_auto)
 
 
+        print(f'mae - auto: {mae}')
+        print(f'mape - auto: {mape}')
+        print(f'rmse - auto: {rmse}')
+        print(f'R2 score : {r2_rec}')
+        # plt.show()
+        
+        
+        print('-'*100)
+        cnt += 1
+    prediction_value_temp.to_csv('Prediction_value.csv')
+    return prediction_value_temp
     
 def Call_PCA_graph(data, original):
     pca = PCA()
@@ -48,212 +231,106 @@ def Call_PCA_graph(data, original):
     
     pass 
 
-def Call_Model_PCA(data, target):
-    start = time.time()
-    #--------------Model testing
-    best_mse = []
-    param_record = {}
-    mse_fig = []
-    pca_record = {}
+def Call_Model_SVR(predict_value):
+    # start = time.time()
     
-    #Data preprocessing
-    from sklearn.preprocessing import StandardScaler as ss
-    scaled_data = ss().fit_transform(data)
-    Call_PCA_graph(scaled_data, data)
+    data_target, data_mine, data_ele_gas, data_water, data_tech = Call_329data()
+    cont_nm = [data_mine, data_ele_gas, data_tech]
+    Industry_name = ['礦業及土石採取業', '電力及燃氣供應業', "資訊電子工業"]
+    # print(data_ele_gas.index)
+    # print(f'len of data tech : {data_target.shape}')
+    # print(f'len of data mine : {data_mine.shape}')
+    # print(f'len of data ele gas : {data_ele_gas.shape}')
+    # print(f'len of data tech : {data_tech.shape}')
     
+    #-----------container init
+    mse_rec = 1000000
+    count = 0
+    r2_rec = 0
+
+    # -----------Training & Testing Data prepare:
+    '''
+    ----------DataSet split
+    Data : 329
+        >>> training set : 276
+            >>> Date : 1996 M1 ~ 2018 M12
+        >>> testing set : 52
+            >>> Date : 2019 M1 ~ 2023 M4
+    '''
     
-    for i in range(1, len(data.columns)+1 ):
+    data_col = pd.DataFrame(columns=[])
+    for i in range(len(Industry_name)):
+        data_col.insert(i, column=Industry_name[i], value = cont_nm[i])
         
-        #-----------container init
-        mse_rec = 1000000
-        count = 0
-        r2_rec = 0
-        
+    print(data_col)
+    n = 264
+    data_col_svr = data_col.iloc[:][:n]
+    data_target_svr = data_target.iloc[:][:n]
+    print(data_col_svr)
+    print(data_target_svr)
+    # Number of Training Data
+    x_train, x_test, y_train, y_test = train_test_split(data_col_svr, data_target_svr, test_size=0.1)
+    print(x_train)
+    print(x_test)
+    print(f'X training data : {x_train.shape},\n x testing data : {x_test.shape}, \n y training data : {y_train.shape}, \n y testing data : {y_test.shape} ')
 
-
-        print('-'*100+'Round('+str(i)+')')
-        # -----------pca_model
-        
+    # -----------SVR_model
+    print('SVR Result =====')
+    test_sc = []
+    train_sc = []
+    test_sc_num = 0
+    train_sc_num = 0
     
-        
-        pca_model = PCA(n_components=i)
-        X_pca = pca_model.fit_transform(scaled_data)
-        # print('Data Shape :')
-        # print(f'-----Origin Data shape : {data.shape}')
-        # print(f'-----PCA Data shape : {X_pca.shape}')
-        
-
-        # -----------Training & Testing Data prepare:
-        '''
-        ----------DataSet split
-        Data : 329
-            >>> training set : 276
-                >>> Date : 1996 M1 ~ 2018 M12
-            >>> testing set : 52
-                >>> Date : 2019 M1 ~ 2023 M4
-        '''
-
-        
-        n = 276 # Number of Training Data
-        x_train = X_pca[:][:n].copy()
-        x_test = X_pca[:][n:].copy()
-    
-        y_train = target[:][:n].copy()
-        y_test = target[:][n:].copy()
-
-        print(f'X training data : {x_train.shape},\n x testing data : {x_test.shape}, \n y training data : {y_train.shape}, \n y testing data : {y_test.shape} ')
-        
-        # -----------Result
-        '''
-        if i == 1:
-            pca_result = pd.DataFrame(pca_model.components_,columns=data.columns,index = ['PC-1'])
-        elif i == 2:
-            pca_result = pd.DataFrame(pca_model.components_,columns=data.columns,index = ['PC-1','PC-2'])
-        elif i == 3:
-            pca_result = pd.DataFrame(pca_model.components_,columns=data.columns,index = ['PC-1','PC-2', 'PC-3'])
-        elif i == 4:
-            pca_result = pd.DataFrame(pca_model.components_,columns=data.columns,index = ['PC-1','PC-2', 'PC-3', 'PC-4'])
-        elif i == 5:
-            pca_result = pd.DataFrame(pca_model.components_,columns=data.columns,index = ['PC-1','PC-2', 'PC-3', 'PC-4', 'PC-5'])
-        elif i == 6:
-            pca_result = pd.DataFrame(pca_model.components_,columns=data.columns,index = ['PC-1','PC-2', 'PC-3', 'PC-4', 'PC-5', 'PC-6'])
-        elif i == 7:
-            pca_result = pd.DataFrame(pca_model.components_,columns=data.columns,index = ['PC-1','PC-2', 'PC-3', 'PC-4', 'PC-5', 'PC-6', 'PC-7'])
-        print(pca_result)
-        '''
-        
-        '''
-        pca_record[i] = {'PCA Compnoents':pca_model.components_,
-                         'PCA N_components':pca_model.n_components_, 
-                         'PCA Ratio' : pca_model.explained_variance_ratio_, 
-                         'PCA n_feature' : pca_model.n_features_in_, 
-                        #  'PCA feature_names':pca_model.feature_names_in_,
-                        #  'PCA Result' : pca_result
-                        #  'PCA singular values':pca_model.singular_values_
-                        }
-        '''
-        
-        
-
-        # -----------SVR_model
-        print('SVR Result =====')
-        test_sc = []
-        train_sc = []
-        test_sc_num = 0
-        train_sc_num = 0
-        for j in range(1,50):
-            
-            # print(f'C = {j} ..........')
-            svr_model = SVR(C= j,kernel='rbf', degree= 3, gamma='auto', max_iter=-1)
-            svr_model.fit(x_train, y_train)
-            y_hat = svr_model.predict(x_test)
-            #Score showing
-            # print("Training  Score : ", svr_model.score(x_train,y_train))
-            # print("Testing  Score : ", svr_model.score(x_test, y_test))
-            # print("R^2 得分:", r2_score(y_test, y_hat))
-            mse_score = mse(y_test, y_hat)
-            # print("MSE_Score : ", mse_score)
-            # print("RMSE_Score : ", np.sqrt(mse_score))
-            if mse_score < mse_rec:
-                mse_rec = mse_score
-                count = j
-                r2_rec = r2_score(y_test, y_hat)
-                MAE_score = mae(y_test, y_hat)
-                MAPE_score = mape(y_test, y_hat)
-                test_sc_num = svr_model.score(x_test, y_test)
-                train_sc_num = svr_model.score(x_train,y_train)
-            train_sc.append(svr_model.score(x_train, y_train))
-            test_sc.append(svr_model.score(x_test, y_test))
-        draw_graph(train_sc, test_sc, i)
-        mse_fig.append(math.sqrt(mse_rec))
-        # param_record[i] = {'C': count, 
-        #                     'best_mse_score': mse_rec, 
-        #                     'R2_score': r2_rec, 
-        #                     'Training score' : train_sc_num, 
-        #                     'Testing score' : test_sc_num}
-        param_record[i] = {            
-                'C': count,
-                'best_rmse_score': math.sqrt(mse_rec), 
-                'MAE Score' :  MAE_score,
-                'MAPE Score' : MAPE_score,
-            }
-        # plt.plot(range(len(train_sc)), train_sc, 'go-', label="Train Score")
-        # plt.plot(range(len(test_sc)), test_sc, 'co-', label="Test Score")
-
-
-    end = time.time()
-    print("執行時間：%f 秒" % (end - start))
-    
-    plt.subplots_adjust(left=0.125,
-                    bottom=0.1, 
-                    right=0.9, 
-                    top=0.9, 
-                    wspace=0.2, 
-                    hspace=0.35)
-    plt.show()
-    #PCA result
-    # print(pca_record)
-
-    #--------------Model result
-    print(param_record)
-    plt.title('SVR + PCA : 資料集A2')
-    plt.plot(range(1, len(data.columns)+1), mse_fig, 'co-', label="Train Score")
-    plt.xlabel('pca number')
-    plt.ylabel('RMSE value')
-    plt.show()
-
-
-    #show plot
-
-
-
-def Call_497data():
-
-    # Data loading
-    data1, data2, data1_1, data2_2, data3, data4, data5, data6 = data_col()
-    
-    data_column = ['金屬機電工業', '資訊電子工業', '化學工業', '民生工業', '電力及燃氣供應業', '用水供應業']
-
-    # 原始值-變數-轉換矩陣型態
-    data1_ar = np.array(data1)
-    data1_1ar = np.array(data1_1)
-
-    # 年增率-變數-轉換矩陣型態
-    #Target-setting-To array
-    target_ori = np.array(data5)
-    # print(print(data1_1.head(10)))
-    data1_1.drop('製造業', axis=1, inplace=True)
-    # print(data1_1.columns)
-    print(f'Data number : {data1_1.shape}, target number : {target_ori.shape}')
-    Call_Model_PCA(data1_1, target_ori)
-
+    for j in range(1,50):
+        # print(f'C = {j} ..........')
+        svr_model = SVR(C= j,kernel='rbf', degree= 3, gamma='auto', max_iter=-1)
+        svr_model.fit(x_train, y_train)
+        y_hat = svr_model.predict(x_test)
+        #Score showing
+        # print("Training  Score : ", svr_model.score(x_train,y_train))
+        # print("Testing  Score : ", svr_model.score(x_test, y_test))
+        # print("R^2 得分:", r2_score(y_test, y_hat))
+        mse_score = mse(y_test, y_hat)
+        # print("MSE_Score : ", mse_score)
+        # print("RMSE_Score : ", np.sqrt(mse_score))
+        if mse_score < mse_rec:
+            mse_rec = mse_score
+            count = j
+            r2_rec = r2_score(y_test, y_hat)
+            MAE_score = mae(y_test, y_hat)
+            MAPE_score = mape(y_test, y_hat)
+            test_sc_num = svr_model.score(x_test, y_test)
+            train_sc_num = svr_model.score(x_train,y_train)
+        train_sc.append(svr_model.score(x_train, y_train))
+        test_sc.append(svr_model.score(x_test, y_test))
+    '''
+    draw_graph(train_sc, test_sc, i)
+    mse_fig.append(math.sqrt(mse_rec))
+    param_record[i] = {            
+            'C': count,
+            'best_rmse_score': math.sqrt(mse_rec), 
+            'MAE Score' :  MAE_score,
+            'MAPE Score' : MAPE_score,
+        }
+    '''
 
 def Call_329data():
-    data1 = pd.read_csv('..\..\OriginalValue(329).csv',encoding='cp950')
+    #data_329 = pd.DataFrame(pd.read_csv('..\..\OriginalValue(329)_copy.csv',encoding='cp950', index_col=0)) #mac
+    data_329 = pd.DataFrame(pd.read_csv('..\OriginalValue(329)_copy.csv',encoding='cp950', index_col=0)) 
+    # print(data_329.head())
+    data_329.index = pd.to_datetime(data_329.index)
+    # print(data_329.head(10))
     
+    data_329_target = data_329['總指數']
+    data_329_mine = data_329['礦業及土石採取業']
+    data_329_ele_gas = data_329['電力及燃氣供應業']
+    data_329_water = data_329['用水供應業']
+    data_329_tech = data_329['資訊電子工業']
     
-
-    #Split the year from the data
-    data1_Orininal_year = data1.iloc[:, 0]
-    data1.drop(' ', axis=1, inplace=True)
-    # print(data1.head(10))
-    data1 = data1.astype('float64')
-
-
-
-    #target set : 總指數 and 總指數(不含土石採取業)
-    target_data1 = data1.iloc[:, 0]
-    #target set : train value -> data except year and 總指數
-    
-    data1.drop(['總指數', '總指數(不含土石採取業)', '製造業'], axis=1, inplace=True)
-    print(data1.columns)
-    print(f'Data number : {data1.shape}, target number : {target_data1.shape}')
-    # print(data1.head(10))
-    # print(target_data1.head(10))
-    Call_Model_PCA(data1, target_data1)
+    return data_329_target, data_329_mine, data_329_ele_gas, data_329_water, data_329_tech
 if __name__ == '__main__':
-    print('-'*50+'329')
-    Call_329data()
-
-    
+    data_prediction_value = call_ARIMA_model()
+    print(data_prediction_value)
+    # data_prediction_value = [0]
+    # Call_Model_SVR(data_prediction_value)
     

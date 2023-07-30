@@ -263,7 +263,7 @@ if __name__== "__main__":
         # print(df_train)
         print(f'train : {df_train.shape}')
         print(f'test : {df_test.shape}')
-        
+
         df_test.replace([np.inf, -np.inf], 0, inplace=True)
 
 
@@ -293,7 +293,9 @@ if __name__== "__main__":
                                  m = i,
                                  d=None,
                                  start_P=0, D=1, 
+        
                                  error_action='ignore')
+        
         # model_fit = auto_arima.fit()
         auto_arima.fit(df_train)    
         
@@ -311,7 +313,8 @@ if __name__== "__main__":
         forecast_test_auto = pd.DataFrame(forecast_test_auto,index = df_test.index,columns=['Prediction'])
         
         concat1 = pd.concat([df_test, forecast_test_auto],axis=1)
-        concat2 = pd.concat([target,forecast_test_auto],axis=1)
+        concat2 = pd.concat([target, forecast_test_auto],axis=1)
+        
         # print(concat1)
         # print(concat2)
         

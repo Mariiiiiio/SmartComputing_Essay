@@ -259,7 +259,7 @@ def Call_329data():
     #Split the year from the data
     data1_Orininal_year = data1.iloc[:, 0]
     data1.drop(' ', axis=1, inplace=True)
-    # print(data1.head(10))
+    print(data1.head(10))
     data1 = data1.astype('float64')
 
 
