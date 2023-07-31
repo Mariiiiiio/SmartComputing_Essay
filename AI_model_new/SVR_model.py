@@ -96,27 +96,12 @@ def ARIMA_preVal(data, ind_name):
     # print('---White Noise Test:')
     # whiteNoiseCheck(time_series_diff1)
     
-    # print('-'*100)
-    '''
-    for i in range(1, 24):
-        print('-'*100+'週期設定:', end="")
-        print(i, ':', ind_name)
-        time_series_diff2 = time_series_diff1.diff(i)
-        # print(time_series_diff2[time_series_diff2.isnull().values==True], time_series_diff2.shape)
-        
-        time_series_diff2 = time_series_diff2.dropna()
-        # print(time_series_diff2)
-        second_adf_test(time_series_diff2, data)
-        
-        print('---White Noise Test:')
-        whiteNoiseCheck(time_series_diff2)
-        
-        # print('-'*100)
-    '''
+
+    
     return time_series_diff1
 def second_adf_test(data, orig):
     
-    # stableCheck(orig, data)
+    stableCheck(orig, data)
     
     print('Second Test - Results of Dickey-Fuller Test:')
     dftest = adfuller(data, autolag='AIC')
@@ -131,11 +116,11 @@ def second_adf_test(data, orig):
 
 # Documents : 
 def call_ARIMA_model():
-    data_target, data_mine, data_ele_gas, data_water, data_tech, data_chemi= Call_329data()
-    cont_nm = [data_mine, data_chemi, data_ele_gas]
-    
-    Industry_name = ['礦業及土石採取業',"化學工業", '電力及燃氣供應業']
-    
+    data_target, data_mine, data_ele_gas, data_water, data_tech, data_chemi, data_metal_mach= Call_329data()
+    cont_nm = [data_tech, data_metal_mach, data_chemi, data_ele_gas]
+    # cont_nm = [data_metal_mach, data_chemi]
+    Industry_name = ['資訊電子工業',"金屬機電工業", '化學工業', '電力及燃氣供應業']
+    # Industry_name = ["金屬機電工業", '化學工業']
     cnt = 0 
     prediction_value_temp = pd.DataFrame(columns=[])
     
@@ -146,7 +131,7 @@ def call_ARIMA_model():
         print(data.shape)
         print()
         print(f'Model Training : {Industry_name[cnt]}')
-        n = 251 #number of training data
+        n = 263 #number of training data
         
         df_train = data[:][:n].copy()
         df_test = data[:][n:].copy()
@@ -179,7 +164,7 @@ def call_ARIMA_model():
         import matplotlib.pyplot as plt
         
         forecast_test_auto = auto_arima.predict(n_periods=len(df_test))
-        print(forecast_test_auto)
+        # print(forecast_test_auto)
         
         
         prediction_value_temp.insert(cnt, column=Industry_name[cnt], value=forecast_test_auto)
@@ -206,45 +191,23 @@ def call_ARIMA_model():
         print(f'mape - auto: {mape}')
         print(f'rmse - auto: {rmse}')
         print(f'R2 score : {r2_rec}')
-        # plt.show()
+        plt.show()
         
         
         print('-'*100)
         cnt += 1
+        # print(f'----------預測值：{prediction_value_temp}')
     prediction_value_temp.to_csv('Prediction_value.csv')
     return prediction_value_temp
     
-def Call_PCA_graph(data, original):
-    pca = PCA()
-    X_pca = pca.fit_transform(data)
-    PCnames = ['PC'+str(i+1) for i in range(pca.n_components_)]
-    Loadings = pd.DataFrame(data = pca.components_, columns=PCnames,index=original.columns)
-    print(Loadings.iloc[:,:])
-    exp_var_ratio = pca.explained_variance_ratio_
-    
-    print(exp_var_ratio.shape)
-    #Draw Graph
-    plt.figure(figsize=(6, 4))
-    plt.bar(range(1, len(original.columns)+1), exp_var_ratio, alpha=0.5, label='individual explained ratio')
-    plt.ylabel('Explained variance ratio')
-    plt.xlabel('Principal components')
-    plt.legend(loc='best')
-    plt.tight_layout()
-    plt.show()
-    
-    Loadings["PC1"].sort_values().plot.barh()
-    plt.show()
-    
-    pass 
-
 def Call_Model_SVR(predict_value):
     # start = time.time()
     
-    data_target, data_mine, data_ele_gas, data_water, data_tech, data_chemi= Call_329data()
-    # cont_nm = [data_mine, data_ele_gas, data_tech, data_chemi]
-    cont_nm = [data_chemi]
-    # Industry_name = ['礦業及土石採取業', '電力及燃氣供應業', "資訊電子工業", "化學工業"]
-    Industry_name = ["化學工業"]
+    data_target, data_mine, data_ele_gas, data_water, data_tech, data_chemi, data_metal_mach= Call_329data()
+    cont_nm = [data_tech, data_metal_mach, data_chemi, data_ele_gas]
+    # cont_nm = [data_metal_mach, data_chemi]
+    Industry_name = ['資訊電子工業',"金屬機電工業", '化學工業', '電力及燃氣供應業']
+
     # print(data_ele_gas.index)
     # print(f'len of data tech : {data_target.shape}')
     # print(f'len of data mine : {data_mine.shape}')
@@ -259,11 +222,13 @@ def Call_Model_SVR(predict_value):
     # -----------Training & Testing Data prepare:
     '''
     ----------DataSet split
-    Data : 329
-        >>> training set : 276
-            >>> Date : 1996 M1 ~ 2018 M12
-        >>> testing set : 52
-            >>> Date : 2019 M1 ~ 2023 M4
+
+    原本資料 : 288筆 ; 扣除經由2018-2019年的24筆資料，兩年資料將做為驗證預測的可行性
+
+    Data : 264(含土礦) : 1996 M2 ~ 2017 M12
+        >>> training set : 237
+        >>> testing set : 27
+        
     '''
     
     data_col = pd.DataFrame(columns=[])
@@ -277,11 +242,11 @@ def Call_Model_SVR(predict_value):
     print(data_col_svr)
     print(data_target_svr)
     # Number of Training Data
-    x_train, x_test, y_train, y_test = train_test_split(data_col_svr, data_target_svr, test_size=0.1)
+    x_train, x_test, y_train, y_test = train_test_split(data_col_svr, data_target_svr, test_size=0.0)
     print(x_train)
     print(x_test)
     print(f'X training data : {x_train.shape},\n x testing data : {x_test.shape}, \n y training data : {y_train.shape}, \n y testing data : {y_test.shape} ')
-
+    a = input('press anything~~~')
     # -----------SVR_model
     print('SVR Result =====')
     test_sc = []
@@ -324,21 +289,34 @@ def Call_Model_SVR(predict_value):
 
 def Call_329data():
     #data_329 = pd.DataFrame(pd.read_csv('..\..\OriginalValue(329)_copy.csv',encoding='cp950', index_col=0)) #mac
-    data_329 = pd.DataFrame(pd.read_csv('..\OriginalValue(329)_copy.csv',encoding='cp950', index_col=0)) 
+    # data_329 = pd.DataFrame(pd.read_csv('..\OriginalValue(329)_copy.csv',encoding='cp950', index_col=0)) 
+    data_329 = pd.DataFrame(pd.read_csv('/Users/mariio/專題/論文專題/OriginalValue(329)_copy.csv',encoding='cp950', index_col=0)) 
     # print(data_329.head())
     data_329.index = pd.to_datetime(data_329.index)
     # print(data_329.head(10))
     
+    '''
+    使用行業：
+    >>> 資訊電子工業
+    >>> 金屬機電工業
+    >>> 化學工業
+    >>> 電力及燃氣供應業
+    '''
+
+
+
     data_329_target = data_329['總指數']
     data_329_mine = data_329['礦業及土石採取業']
     data_329_ele_gas = data_329['電力及燃氣供應業']
     data_329_water = data_329['用水供應業']
     data_329_tech = data_329['資訊電子工業']
     data_329_chemi = data_329['化學工業']
-    return data_329_target, data_329_mine, data_329_ele_gas, data_329_water, data_329_tech, data_329_chemi
+    data_329_metal_mach = data_329['金屬機電工業']
+    return data_329_target, data_329_mine, data_329_ele_gas, data_329_water, data_329_tech, data_329_chemi, data_329_metal_mach
 if __name__ == '__main__':
-    data_prediction_value = call_ARIMA_model()
-    print(data_prediction_value)
-    # data_prediction_value = [0]
+    # data_prediction_value = call_ARIMA_model()
+    data_prediction_file = pd.read_csv('/Users/mariio/專題/論文專題/AI_model_new/Prediction_value_24m.csv', index_col=0)
+    data_prediction_file.index = pd.to_datetime(data_prediction_file.index)
+    print(data_prediction_file)
     # Call_Model_SVR(data_prediction_value)
     
