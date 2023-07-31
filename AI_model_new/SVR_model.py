@@ -80,13 +80,21 @@ def ARIMA_preVal(data, ind_name):
     dfoutput = pd.Series(dftest[0:4], index=['Test Statistic', 'p-value', '#Lags Used', 'Number of Observations Used'])
     for key, value in dftest[4].items():
         dfoutput['Critical Value (%s)' % key] = value
-    #print('ADF檢驗結果:')
-    #print(dfoutput)
+        
+    # print('ADF檢驗結果:')
+    # print(dfoutput)
+    
     time_series_diff1 = data.diff(1)
+    
     # print('Nan Result : ', end="")
     # print(time_series_diff1[time_series_diff1.isnull().values==True], time_series_diff1.shape)
     # print()
+    
     time_series_diff1 = time_series_diff1.dropna()
+    
+    # second_adf_test(time_series_diff1, data)
+    # print('---White Noise Test:')
+    # whiteNoiseCheck(time_series_diff1)
     
     # print('-'*100)
     '''
@@ -123,10 +131,10 @@ def second_adf_test(data, orig):
 
 # Documents : 
 def call_ARIMA_model():
-    data_target, data_mine, data_ele_gas, data_water, data_tech = Call_329data()
-    cont_nm = [data_mine, data_ele_gas, data_tech]
+    data_target, data_mine, data_ele_gas, data_water, data_tech, data_chemi= Call_329data()
+    cont_nm = [data_mine, data_chemi, data_ele_gas]
     
-    Industry_name = ['礦業及土石採取業', '電力及燃氣供應業', "資訊電子工業"]
+    Industry_name = ['礦業及土石採取業',"化學工業", '電力及燃氣供應業']
     
     cnt = 0 
     prediction_value_temp = pd.DataFrame(columns=[])
@@ -134,9 +142,7 @@ def call_ARIMA_model():
     for i in cont_nm:
         data = 0
         data = ARIMA_preVal(i, Industry_name[cnt])
-        
-        
-        
+
         print(data.shape)
         print()
         print(f'Model Training : {Industry_name[cnt]}')
@@ -234,9 +240,11 @@ def Call_PCA_graph(data, original):
 def Call_Model_SVR(predict_value):
     # start = time.time()
     
-    data_target, data_mine, data_ele_gas, data_water, data_tech = Call_329data()
-    cont_nm = [data_mine, data_ele_gas, data_tech]
-    Industry_name = ['礦業及土石採取業', '電力及燃氣供應業', "資訊電子工業"]
+    data_target, data_mine, data_ele_gas, data_water, data_tech, data_chemi= Call_329data()
+    # cont_nm = [data_mine, data_ele_gas, data_tech, data_chemi]
+    cont_nm = [data_chemi]
+    # Industry_name = ['礦業及土石採取業', '電力及燃氣供應業', "資訊電子工業", "化學工業"]
+    Industry_name = ["化學工業"]
     # print(data_ele_gas.index)
     # print(f'len of data tech : {data_target.shape}')
     # print(f'len of data mine : {data_mine.shape}')
@@ -326,8 +334,8 @@ def Call_329data():
     data_329_ele_gas = data_329['電力及燃氣供應業']
     data_329_water = data_329['用水供應業']
     data_329_tech = data_329['資訊電子工業']
-    
-    return data_329_target, data_329_mine, data_329_ele_gas, data_329_water, data_329_tech
+    data_329_chemi = data_329['化學工業']
+    return data_329_target, data_329_mine, data_329_ele_gas, data_329_water, data_329_tech, data_329_chemi
 if __name__ == '__main__':
     data_prediction_value = call_ARIMA_model()
     print(data_prediction_value)
