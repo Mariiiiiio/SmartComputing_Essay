@@ -1,7 +1,7 @@
 from sklearn.decomposition import PCA
 from sklearn.svm import SVR
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import r2_score
+from sklearn.metrics import r2_score, classification_report
 from sklearn.metrics import mean_absolute_error as mse
 from sklearn.metrics import mean_absolute_error as mae
 from sklearn.metrics import mean_absolute_percentage_error as mape
@@ -37,8 +37,8 @@ def  draw_graph(train_data, test_data , round_num = 0):
 
     # plt.subplot(2, 4, round_num)
     # plt.title(f'ICA = {round_num}')
-    plt.plot(range(1, 50), train_data, 'co-', label = f'train data', markersize=4)
-    plt.plot(range(1, 50), test_data, 'go-', label = f'test data', markersize=4)
+    plt.plot(range(1, len(train_data)+1), train_data, 'co-', label = f'train data', markersize=4)
+    plt.plot(range(1, len(test_data)+1), test_data, 'go-', label = f'test data', markersize=4)
     plt.legend()
     plt.xlabel("C number")
     plt.ylabel("Value")
@@ -184,11 +184,11 @@ def call_ARIMA_model():
         
         # forcasting = inv_diff(forecast_test_auto, 1)
         prediction_value_temp.insert(cnt, column=Industry_name[cnt], value=forecast_test_auto)
-        print('-'*50)
-        print(forecast_test_auto)
-        print(prediction_value_temp)              
+        # print('-'*50)
+        # print(forecast_test_auto)
+        # print(prediction_value_temp)              
         
-        print('-'*50)
+        # print('-'*50)
         # print(forecast_test_auto)
         
         forecast_test_auto = pd.DataFrame(forecast_test_auto,index = df_test.index,columns=['Prediction'])
@@ -209,16 +209,15 @@ def call_ARIMA_model():
         print(f'mape - auto: {mape}')
         print(f'rmse - auto: {rmse}')
         print(f'R2 score : {r2_rec}')
-        plt.show()
-        
+        # plt.show()        
         
         print('-'*100)
         cnt += 1
         # print(f'----------預測值：{prediction_value_temp}')
-    prediction_value_temp.to_csv('Prediction_value.csv')
+    prediction_value_temp.to_csv('Prediction_value_263.csv')
     return prediction_value_temp
     
-def Call_Model_SVR(predict_value):
+def Call_Model_SVR(predict_value, train_num):
     # start = time.time()
     
     data_target, data_mine, data_ele_gas, data_water, data_tech, data_chemi, data_metal_mach= Call_329data()
@@ -241,6 +240,8 @@ def Call_Model_SVR(predict_value):
     r2_rec = 0
     param_record = {}
     mse_fig = []
+    MAE_rec = 100
+    MAPE_rec = 100
     # -----------Training & Testing Data prepare:
     '''
     ----------DataSet split
@@ -257,49 +258,93 @@ def Call_Model_SVR(predict_value):
     for i in range(len(Industry_name)):
         data_col.insert(i, column=Industry_name[i], value = cont_nm[i])
         
-    print(data_col)
-    n = 264
-    data_col_svr = data_col.iloc[:][:n]
-    data_target_svr = data_target.iloc[:][:n]
-
+    # print(data_col)
+    n = train_num
+    # print('-'*50)
+    
+    
+    ''' Only from original data to use the svr model for prediction'''
+    data_col_svr_ori = data_col.iloc[:][:n]
+    data_target_svr_ori = data_target.iloc[:][:n]
+    
+    data_col_svr_pre = data_col.iloc[:][n:]
+    data_target_svr_pre = data_target.iloc[:][n:]
+    
+    print(f'data1 : {data_col_svr_ori.shape} \n data2 : {data_target_svr_ori.shape} \n \
+        data3 : {data_col_svr_pre.shape} \n data4 : {data_target_svr_pre.shape}')
+    
+    x_tr, x_te, y_tr, y_te = train_test_split(data_col_svr_ori, data_target_svr_ori, test_size=0.2, random_state=2)
+    x_train = pd.concat([x_tr, x_te])
+    y_train = pd.concat([y_tr, y_te])
+    
+    
+    x_tr2, x_te2, y_tr2, y_te2 = train_test_split(data_col_svr_pre, data_target_svr_pre, test_size=0.2, random_state=2)
+    x_test = pd.concat([x_tr2, x_te2])
+    y_test = pd.concat([y_tr2, y_te2])
+   
+    
+    
+    
+    # print(data_col_svr)
+    # print(data_target_svr)
+    
+    print(f'X training data : {x_train.shape},\n x testing data : {x_test.shape},\
+        \n y training data : {y_train.shape}, \n y testing data : {y_test.shape} ')
+    a = input('presssssss')
+    
+    
+    ''' -----------------SVR part
     data_col_arima_pridiction = predict_value
     data_target_arima = data_target.iloc[:][n:]
- 
+    
+    
+    
+    # print(data_col_arima_pridiction)
+    # print(data_target_arima)
+    
     # Number of Training Data
-    x_train, x_test, y_train, y_test = train_test_split(data_col_svr, data_target_svr, test_size=0.1)
-
-    x_train = pd.concat([x_train, x_test])
-    y_train = pd.concat([y_train, y_test])
-
-   
-
-
-    print(f'------')
-    print(data_col_arima_pridiction)
-    print(data_target_arima)
+    x_train_svr, x_test_svr, y_train_svr, y_test_svr = train_test_split(data_col_svr, data_target_svr, test_size=0.2)
+    
+    
+    
+    x_train = pd.concat([x_train_svr, x_test_svr])
+    # x_train.plot()
+    y_train = pd.concat([y_train_svr, y_test_svr])
+    # y_train.plot()
+    # plt.show()
     x_train_ar, x_test_ar, y_train_ar, y_test_ar = train_test_split(data_col_arima_pridiction, data_target_arima, test_size=0.2)
-    
-    print('arima:')
     print(f'X training data : {x_train_ar.shape},\n x testing data : {x_test_ar.shape}, \n y training data : {y_train_ar.shape}, \n y testing data : {y_test_ar.shape} ')
-    print(x_train_ar)
-    print(x_test_ar)
-    print('-'*10)
+    '''
     
-
+    '''-----------------ARIMA part
     x_test = pd.concat([x_train_ar, x_test_ar])
+    # x_test.plot()
     y_test = pd.concat([y_train_ar, y_test_ar])
+    # y_test.plot()
+    
+    # plt.show()
 
     print(f'X training data : {x_train.shape},\n x testing data : {x_test.shape}, \n y training data : {y_train.shape}, \n y testing data : {y_test.shape} ')
-    a = input('press anything~~~')
+
+    '''
+    
+    
+
+    
+
+    
+    
     # -----------SVR_model
     print('SVR Result =====')
     test_sc = []
     train_sc = []
     test_sc_num = 0
     train_sc_num = 0
-    
-    for j in range(1,50):
+    # num_c = 0.1
+    for j in range(28,29):
+        
         print(f'C = {j} ..........')
+        
         svr_model = SVR(C= j,kernel='rbf', degree= 3, gamma='auto', max_iter=-1)
         svr_model.fit(x_train, y_train)
         y_hat = svr_model.predict(x_test)
@@ -308,6 +353,8 @@ def Call_Model_SVR(predict_value):
         # print("Testing  Score : ", svr_model.score(x_test, y_test))
         # print("R^2 得分:", r2_score(y_test, y_hat))
         mse_score = mse(y_test, y_hat)
+        MAE_score = mae(y_test, y_hat)
+        MAPE_score = mape(y_test, y_hat)
         # print("MSE_Score : ", mse_score)
         # print("RMSE_Score : ", np.sqrt(mse_score))
         r2_val_score = r2_score(y_test, y_hat)
@@ -316,31 +363,44 @@ def Call_Model_SVR(predict_value):
             mse_score = mse(y_test, y_hat)
             count = j
             r2_rec = r2_val_score
-            MAE_score = mae(y_test, y_hat)
-            MAPE_score = mape(y_test, y_hat)
-            
+            MAE_rec = MAE_score
+            MAPE_rec = MAPE_score
+        # num_c += 0.1
         train_sc.append(svr_model.score(x_train, y_train))
         test_sc.append(svr_model.score(x_test, y_test))
         print(f'training score : {svr_model.score(x_train, y_train)}')
         print(f'testing score : {svr_model.score(x_test, y_test)}')
-
         print(f'R square score : {r2_val_score}')
-    
+        mse_fig.append(math.sqrt(mse_rec))
+        print() 
+    # print(classification_report(y_test, y_hat))
     draw_graph(train_sc, test_sc)
-    # mse_fig.append(math.sqrt(mse_rec))
+    print(f'y_hat : \n{y_hat} \ny_ture : {y_test}')
+    for i in range(len(y_hat)):
+        print(y_hat[i] - y_test[i])
+    
+    plt.show()
     param_record = {            
             'C': count,
             'best_rmse_score': math.sqrt(mse_score), 
-            'MAE Score' :  MAE_score,
-            'MAPE Score' : MAPE_score,
+            'MAE Score' :  MAE_rec,
+            'MAPE Score' : MAPE_rec,
             'R2_score': r2_rec, 
         }
     print(param_record)
+    plt.title('RMSE Score')
+    plt.plot(range(len(mse_fig)), mse_fig, 'co-', label="Train Score")
+    plt.xlabel('C number')
+    plt.ylabel('RMSE value')
+    plt.show()
 
 def Call_329data():
     #data_329 = pd.DataFrame(pd.read_csv('..\..\OriginalValue(329)_copy.csv',encoding='cp950', index_col=0)) #mac
     # data_329 = pd.DataFrame(pd.read_csv('..\OriginalValue(329)_copy.csv',encoding='cp950', index_col=0)) 
-    data_329 = pd.DataFrame(pd.read_csv('/Users/mariio/專題/論文專題/OriginalValue(329)_copy.csv',encoding='cp950', index_col=0)) 
+    
+    # data_329 = pd.DataFrame(pd.read_csv('/Users/mariio/專題/論文專題/OriginalValue(329)_copy.csv',encoding='cp950', index_col=0))  #mac ver
+    data_329 = pd.DataFrame(pd.read_csv('..\OriginalValue(329)_copy.csv',encoding='cp950', index_col=0))   #windows ver
+    
     # print(data_329.head())
     data_329.index = pd.to_datetime(data_329.index)
     # print(data_329.head(10))
@@ -365,9 +425,17 @@ def Call_329data():
     return data_329_target, data_329_mine, data_329_ele_gas, data_329_water, data_329_tech, data_329_chemi, data_329_metal_mach
 if __name__ == '__main__':
     # data_prediction_value = call_ARIMA_model()
-    data_prediction_file = pd.read_csv('/Users/mariio/專題/論文專題/AI_model_new/Prediction_value_undiff.csv', index_col=0)
-    data_prediction_file.index = pd.to_datetime(data_prediction_file.index)
+    #data_prediction_file = pd.read_csv('/Users/mariio/專題/論文專題/AI_model_new/Prediction_value_undiff.csv', index_col=0) #mac ver
+    data_prediction_file_264 = pd.read_csv('.\Prediction_value_264.csv', index_col=0) #windows ver
+    data_prediction_file_264.index = pd.to_datetime(data_prediction_file_264.index)
 
+    data_prediction_file_263 = pd.read_csv('.\Prediction_value_263.csv', index_col=0) #windows ver
+    data_prediction_file_263.index = pd.to_datetime(data_prediction_file_263.index)
+    
     # print(data_prediction_file)
-    Call_Model_SVR(data_prediction_file)
+    print(f'-----------Start The 264-----------')
+    Call_Model_SVR(data_prediction_file_264, 264)
+    
+    # print(f'-----------Start The 263-----------')
+    # Call_Model_SVR(data_prediction_file_263, 263)
     
