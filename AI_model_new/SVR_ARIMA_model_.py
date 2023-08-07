@@ -16,6 +16,10 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.stats.diagnostic import acorr_ljungbox as lb_test
 from statsmodels.tsa.stattools import adfuller 
 import pmdarima as pm
+from sklearn import svm
+from sklearn import datasets
+import joblib
+
 
 plt.rcParams["font.sans-serif"]=["SimHei"] #设置字体
 plt.rcParams["axes.unicode_minus"]=False
@@ -39,13 +43,33 @@ def  draw_graph(train_data, test_data , round_num = 0):
 
     # plt.subplot(2, 4, round_num)
     # plt.title(f'ICA = {round_num}')
-    plt.plot(range(1, len(train_data)+1), train_data, 'co-', label = f'train data', markersize=4)
-    plt.plot(range(1, len(test_data)+1), test_data, 'go-', label = f'test data', markersize=4)
+    plt.plot(range(1, len(train_data)+1), train_data, 'co-', label = f'train value', markersize=4)
+    plt.plot(range(1, len(test_data)+1), test_data, 'go-', label = f'test value', markersize=4)
     plt.legend()
     plt.xlabel("C number")
     plt.ylabel("Value")
     plt.show()
+    
+def  draw_graph_SVR_Score(true_val, pred_val , round_num = 0):
 
+    # plt.subplot(2, 4, round_num)
+    # plt.title(f'ICA = {round_num}')
+    # print(true_val)
+    # print(pred_val)
+    # a = input()
+    true_val = true_val.values.reshape(-1,1)
+    pred_val = pred_val.reshape(-1,1)
+    print(true_val)
+    print(pred_val)
+    a = input()
+    plt.plot(range(1, len(true_val)+1), true_val, 'co-', label = f'True', markersize=4)
+    plt.plot(range(1, len(pred_val)+1), pred_val, 'go-', label = f'Predictions', markersize=4)
+    plt.legend()
+    plt.xlabel("Observation")
+    plt.ylabel("Value")
+    plt.show()
+    
+    
 def whiteNoiseCheck(data):
     
     result = lb_test(data, lags=1)
@@ -70,6 +94,7 @@ def inv_diff(diff_df, first_value, add_first=True):
         df.loc[0] = first_value
         df.sort_index(inplace=True)
     return df
+
 
 def ARIMA_preVal(data, ind_name):
     
@@ -215,7 +240,7 @@ def call_ARIMA_model():
         print(f'mape - auto: {mape}')
         print(f'rmse - auto: {rmse}')
         print(f'R2 score : {r2_rec}')
-        # plt.show()        
+        plt.show()        
         
         print('-'*100)
         cnt += 1
@@ -225,17 +250,32 @@ def call_ARIMA_model():
     prediction_value_temp.to_csv('Season_SARIMA_Indicator_value.csv')
     return prediction_value_temp
     
+def SVR_prediction(pred, target):
+        reg1 = joblib.load('svr_model1.pkl')
+        pred_result = reg1.predict(pred[:])
+        print(pred_result)
+        draw_graph_SVR_Score(pred_result, target) 
+        mse_score = mse(target, pred_result)
+        MAE_score = mae(target, pred_result)
+        MAPE_score = mape(target, pred_result)
+        r2_val_score = r2_score(target, pred_result)
+        print("_Score : ", mse_score)
+        print("RMSE_Score : ", np.sqrt(mse_score))
+        print("R square : ", r2_val_score)
+    
+    
 def Call_Model_SVR(predict_value, train_num):
     # start = time.time()
     
-    data_target, data_mine, data_ele_gas, data_water, data_tech, data_chemi, data_metal_mach= Call_329data()
+    data_target, data_mine, data_ele_gas, data_water, data_tech, data_chemi, data_metal_mach, data_normal= Call_329data()
 
     cont_nm = [data_tech, data_metal_mach, data_chemi, data_ele_gas]
     # cont_nm = [data_metal_mach, data_chemi]
     Industry_name = ['資訊電子工業',"金屬機電工業", '化學工業', '電力及燃氣供應業']
+    
 
-
-    print(predict_value)
+    
+    
     # print(data_ele_gas.index)
     # print(f'len of data tech : {data_target.shape}')
     # print(f'len of data mine : {data_mine.shape}')
@@ -274,22 +314,32 @@ def Call_Model_SVR(predict_value, train_num):
     ''' Only from original data to use the svr model for prediction'''
     data_col_svr_ori = data_col.iloc[:][:n]
     data_target_svr_ori = data_target.iloc[:][:n]
-    
-    data_col_svr_pre = data_col.iloc[:][n:]
+
+    # data_col_svr_pre = data_col.iloc[:][n:]
     data_target_svr_pre = data_target.iloc[:][n:]
     
+    x_train, x_test, y_train, y_test = train_test_split(data_col_svr_ori, data_target_svr_ori, test_size=0.2, random_state=2)
+    print(f'data1 : {data_col_svr_ori.shape} \n data2 : {data_target_svr_ori.shape}')
+    
+    '''
     print(f'data1 : {data_col_svr_ori.shape} \n data2 : {data_target_svr_ori.shape} \n \
         data3 : {data_col_svr_pre.shape} \n data4 : {data_target_svr_pre.shape}')
     
     x_tr, x_te, y_tr, y_te = train_test_split(data_col_svr_ori, data_target_svr_ori, test_size=0.2, random_state=2)
+    
     x_train = pd.concat([x_tr, x_te])
     y_train = pd.concat([y_tr, y_te])
+    print(x_train)
+    print(y_train)
     
-    
-    x_tr2, x_te2, y_tr2, y_te2 = train_test_split(data_col_svr_pre, data_target_svr_pre, test_size=0.2, random_state=2)
+    x_tr2, x_te2, y_tr2, y_te2 = train_test_split(predict_value, data_target_svr_pre, test_size=0.2, random_state=2)
     x_test = pd.concat([x_tr2, x_te2])
     y_test = pd.concat([y_tr2, y_te2])
-   
+    print(x_test)
+    print(y_test)
+    '''
+    
+    
     
     
     
@@ -298,7 +348,7 @@ def Call_Model_SVR(predict_value, train_num):
     
     print(f'X training data : {x_train.shape},\n x testing data : {x_test.shape},\
         \n y training data : {y_train.shape}, \n y testing data : {y_test.shape} ')
-    a = input('presssssss')
+    # a = input('presssssss')
     
     
     ''' -----------------SVR part
@@ -335,13 +385,7 @@ def Call_Model_SVR(predict_value, train_num):
     print(f'X training data : {x_train.shape},\n x testing data : {x_test.shape}, \n y training data : {y_train.shape}, \n y testing data : {y_test.shape} ')
 
     '''
-    
-    
 
-    
-
-    
-    
     # -----------SVR_model
     print('SVR Result =====')
     test_sc = []
@@ -380,14 +424,20 @@ def Call_Model_SVR(predict_value, train_num):
         print(f'testing score : {svr_model.score(x_test, y_test)}')
         print(f'R square score : {r2_val_score}')
         mse_fig.append(math.sqrt(mse_rec))
-        print() 
+        
+        print()
+        draw_graph_SVR_Score(y_test, y_hat) 
+        joblib.dump(svr_model,'svr_model1.pkl')
     # print(classification_report(y_test, y_hat))
-    draw_graph(train_sc, test_sc)
-    print(f'y_hat : \n{y_hat} \ny_ture : {y_test}')
-    for i in range(len(y_hat)):
-        print(y_hat[i] - y_test[i])
     
-    plt.show()
+    # draw_graph(train_sc, test_sc)
+    
+    
+    # print(f'y_hat : \n{y_hat} \ny_ture : {y_test}')
+    # for i in range(len(y_hat)):
+    #     print(y_hat[i] - y_test[i])
+    
+    # plt.show()
     param_record = {            
             'C': count,
             'best_rmse_score': math.sqrt(mse_score), 
@@ -396,18 +446,23 @@ def Call_Model_SVR(predict_value, train_num):
             'R2_score': r2_rec, 
         }
     print(param_record)
+    
+    a = input('Stopsssssss')
+    # result_svr = pd.DataFrame.from_dict(param_record)
+    # result_svr.to_csv('Result_SVR.csv')
+    
     plt.title('RMSE Score')
     plt.plot(range(len(mse_fig)), mse_fig, 'co-', label="Train Score")
     plt.xlabel('C number')
     plt.ylabel('RMSE value')
     plt.show()
-
+    return data_target_svr_pre
 def Call_329data():
     #data_329 = pd.DataFrame(pd.read_csv('..\..\OriginalValue(329)_copy.csv',encoding='cp950', index_col=0)) #mac
     # data_329 = pd.DataFrame(pd.read_csv('..\OriginalValue(329)_copy.csv',encoding='cp950', index_col=0)) 
     
-    data_329 = pd.DataFrame(pd.read_csv('/Users/mariio/專題/論文專題/OriginalValue(329)_copy.csv',encoding='cp950', index_col=0))  #mac ver
-    # data_329 = pd.DataFrame(pd.read_csv('..\OriginalValue(329)_copy.csv',encoding='cp950', index_col=0))   #windows ver
+    # data_329 = pd.DataFrame(pd.read_csv('/Users/mariio/專題/論文專題/OriginalValue(329)_copy.csv',encoding='cp950', index_col=0))  #mac ver
+    data_329 = pd.DataFrame(pd.read_csv('..\OriginalValue(329)_copy.csv',encoding='cp950', index_col=0))   #windows ver
     
     # print(data_329.head())
     data_329.index = pd.to_datetime(data_329.index)
@@ -433,25 +488,27 @@ def Call_329data():
     data_329_normal = data_329['民生工業']
     return data_329_target, data_329_mine, data_329_ele_gas, data_329_water, data_329_tech, data_329_chemi, data_329_metal_mach, data_329_normal
 if __name__ == '__main__':
-    data_prediction_value = call_ARIMA_model()
+    # data_prediction_value = call_ARIMA_model()
 
 
-    ''' Prediction value part
+    ''' Prediction value part'''
     #data_prediction_file = pd.read_csv('/Users/mariio/專題/論文專題/AI_model_new/Prediction_value_undiff.csv', index_col=0) #mac ver
     data_prediction_file_264 = pd.read_csv('.\Prediction_value_264.csv', index_col=0) #windows ver
     data_prediction_file_264.index = pd.to_datetime(data_prediction_file_264.index)
 
-    data_prediction_file_263 = pd.read_csv('.\Prediction_value_263.csv', index_col=0) #windows ver
-    data_prediction_file_263.index = pd.to_datetime(data_prediction_file_263.index)
-    '''
-
-
-
-
-    ''' SVR model part
-    print(f'-----------Start The 264-----------')
-    Call_Model_SVR(data_prediction_file_264, 264)
+    # data_prediction_file_263 = pd.read_csv('.\Prediction_value_263.csv', index_col=0) #windows ver
+    # data_prediction_file_263.index = pd.to_datetime(data_prediction_file_263.index)
     
+
+
+
+
+    
+    # print(f'-----------Start The 264-----------')
+    target = Call_Model_SVR(data_prediction_file_264, 264)
+    print(f'-----------Start The prediction part-----------')
+    SVR_prediction(data_prediction_file_264, target)
+    '''
     # print(f'-----------Start The 263-----------')
     # Call_Model_SVR(data_prediction_file_263, 263)
     '''

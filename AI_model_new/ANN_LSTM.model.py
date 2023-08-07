@@ -9,6 +9,7 @@ from keras.callbacks import EarlyStopping
 from keras.optimizers import Adam
 from keras.layers import LSTM
 import sys
+from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error
 plt.rcParams["font.sans-serif"]=["SimHei"] #设置字体
 plt.rcParams["axes.unicode_minus"]=False
 
@@ -17,9 +18,12 @@ sys.path.append('/Users/mariio/專題/論文專題')  #for mac
 sys.path.append(r'C:\Users\USER\Desktop\University\Project\SmartComputing_Essay')
 
 def ann_model():
-    target, ele_gas_data, tech_data, chimecal_data, metal_mach_data, allData = Call_329data()
+    data_target, data_mine, data_ele_gas, data_water, data_tech, data_chemi, data_metal_mach, data_normal= Call_329data()
     Industry_name = ['總指數', '資訊電子工業',"金屬機電工業", '化學工業', '電力及燃氣供應業']
-    data_catagory = [target, ele_gas_data, tech_data, chimecal_data, metal_mach_data]
+
+    
+    data_catagory = [data_mine, data_metal_mach, data_tech, data_chemi, data_normal, data_ele_gas, data_water]
+    Industry_name = ['礦業及土石採取業', '金屬機電工業', '資訊電子工業','化學工業','民生工業','電力及燃氣供應業', '用水供應業']
     
     date_pre = ['2018-01-01', '2018-02-01', '2018-03-01', '2018-04-01',
                '2018-05-01', '2018-06-01', '2018-07-01', '2018-08-01',
@@ -31,6 +35,7 @@ def ann_model():
     # split_date = pd.Timestamp()
     n = 240 #number of training data
     cnt = 0
+    prediction_value_temp = pd.DataFrame(columns=[], index=['mae', 'mape', 'rmse', 'R2'])
     for data in data_catagory:
         df_train = data[:][:n].copy()
         df_test = data[:][n:].copy()
@@ -47,8 +52,8 @@ def ann_model():
         # train_sc = scaler.fit_transform(df_train.values.reshape(-1,1))
         # test_sc = scaler.transform(df_test.values.reshape(-1,1))
         
-
-
+        df_train = df_train.values.reshape(-1,1)
+        df_test = df_test.values.reshape(-1,1)
         # print(f'train : {train_sc.shape}, test : {test_sc.shape}')
         predict_mth = 24
         
@@ -80,19 +85,27 @@ def ann_model():
         print(df_test)
         print(y_pred_test_nn)
         
-        
+        mae = mean_absolute_error(y_test, y_pred_test_nn)
+        mape = mean_absolute_percentage_error(y_test, y_pred_test_nn)
+        rmse = np.sqrt(mean_squared_error(y_test, y_pred_test_nn))
+        r2_rec = r2_score(y_test, y_pred_test_nn)
+        contain_ind = [mae, mape, rmse, r2_rec]
+        prediction_value_temp.insert(cnt, column=Industry_name[cnt], value=contain_ind )
+        print(y_test.shape)
+        print(y_pred_test_nn.shape)
         plt.figure(figsize=(10, 6))
         plt.plot(y_test, label='True')
         plt.plot(y_pred_test_nn, label='Preditcions')
-        plt.title("ANN's Prediction")
+        plt.title(f"ANN's Prediction : {Industry_name[cnt]}")
         plt.xlabel('Observation')
         plt.ylabel('Adj Close Scaled')
         plt.xticks(range(24), date_pre, rotation=60)
         plt.legend()
-        # plt.show()
+        plt.show()
 
         
         cnt += 1
+    prediction_value_temp.to_csv('ANN_Indicator_value.csv')
     
 
 def Call_329data():
@@ -110,12 +123,16 @@ def Call_329data():
     >>> 電力及燃氣供應業
     '''
 
+
     data_329_target = data_329['總指數']
+    data_329_mine = data_329['礦業及土石採取業']
     data_329_ele_gas = data_329['電力及燃氣供應業']
+    data_329_water = data_329['用水供應業']
     data_329_tech = data_329['資訊電子工業']
     data_329_chemi = data_329['化學工業']
     data_329_metal_mach = data_329['金屬機電工業']
-    return data_329_target, data_329_ele_gas, data_329_tech, data_329_chemi, data_329_metal_mach, data_329
+    data_329_normal = data_329['民生工業']
+    return data_329_target, data_329_mine, data_329_ele_gas, data_329_water, data_329_tech, data_329_chemi, data_329_metal_mach, data_329_normal
 
 if __name__ == '__main__':
     ann_model()
