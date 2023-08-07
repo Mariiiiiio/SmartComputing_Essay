@@ -50,21 +50,26 @@ def  draw_graph(train_data, test_data , round_num = 0):
     plt.ylabel("Value")
     plt.show()
     
-def  draw_graph_SVR_Score(true_val, pred_val , round_num = 0):
-
+def  draw_graph_SVR_Score(true_val, pred_val):
+    date_pre = ['2018-01-01', '2018-02-01', '2018-03-01', '2018-04-01',
+               '2018-05-01', '2018-06-01', '2018-07-01', '2018-08-01',
+               '2018-09-01', '2018-10-01', '2018-11-01', '2018-12-01',
+               '2019-01-01', '2019-02-01', '2019-03-01', '2019-04-01',
+               '2019-05-01', '2019-06-01', '2019-07-01', '2019-08-01',
+               '2019-09-01', '2019-10-01', '2019-11-01', '2019-12-01']
     # plt.subplot(2, 4, round_num)
     # plt.title(f'ICA = {round_num}')
     # print(true_val)
     # print(pred_val)
     # a = input()
-    true_val = true_val.values.reshape(-1,1)
-    pred_val = pred_val.reshape(-1,1)
+    
     print(true_val)
     print(pred_val)
-    a = input()
+    # a = input()
     plt.plot(range(1, len(true_val)+1), true_val, 'co-', label = f'True', markersize=4)
     plt.plot(range(1, len(pred_val)+1), pred_val, 'go-', label = f'Predictions', markersize=4)
     plt.legend()
+    plt.xticks(range(24), date_pre, rotation=60)
     plt.xlabel("Observation")
     plt.ylabel("Value")
     plt.show()
@@ -254,16 +259,22 @@ def SVR_prediction(pred, target):
         reg1 = joblib.load('svr_model1.pkl')
         pred_result = reg1.predict(pred[:])
         print(pred_result)
-        draw_graph_SVR_Score(pred_result, target) 
+        
         mse_score = mse(target, pred_result)
         MAE_score = mae(target, pred_result)
         MAPE_score = mape(target, pred_result)
         r2_val_score = r2_score(target, pred_result)
-        print("_Score : ", mse_score)
+        cont = [mse_score, MAE_score, MAPE_score, r2_val_score]
+        print("MAE Score : ", MAE_score)
+        print("MAPE Score : ", MAPE_score)
         print("RMSE_Score : ", np.sqrt(mse_score))
         print("R square : ", r2_val_score)
-    
-    
+        pred_result = pred_result.reshape(-1,1)
+        target = target.values.reshape(-1,1)
+        draw_graph_SVR_Score(target, pred_result) 
+        result_svr_pred = pd.DataFrame(columns=['Predictions'], index=['MAE', 'MAPE', 'RMSE', 'R2'], data=cont)
+        print(result_svr_pred)
+        result_svr_pred.to_csv('result_svr_predictions.csv')
 def Call_Model_SVR(predict_value, train_num):
     # start = time.time()
     
@@ -426,7 +437,9 @@ def Call_Model_SVR(predict_value, train_num):
         mse_fig.append(math.sqrt(mse_rec))
         
         print()
-        draw_graph_SVR_Score(y_test, y_hat) 
+        true_val = y_test.values.reshape(-1,1)
+        pred_val = y_hat.reshape(-1,1)
+        draw_graph_SVR_Score(true_val, pred_val) 
         joblib.dump(svr_model,'svr_model1.pkl')
     # print(classification_report(y_test, y_hat))
     
@@ -499,14 +512,14 @@ if __name__ == '__main__':
     # data_prediction_file_263 = pd.read_csv('.\Prediction_value_263.csv', index_col=0) #windows ver
     # data_prediction_file_263.index = pd.to_datetime(data_prediction_file_263.index)
     
-
-
-
-
+    n = 264
+    data_target, data_mine, data_ele_gas, data_water, data_tech, data_chemi, data_metal_mach, data_normal= Call_329data()
+    target = data_target.iloc[:][n:]
+    
     
     # print(f'-----------Start The 264-----------')
-    target = Call_Model_SVR(data_prediction_file_264, 264)
-    print(f'-----------Start The prediction part-----------')
+    # target = Call_Model_SVR(data_prediction_file_264, 264)
+    # print(f'-----------Start The prediction part-----------')
     SVR_prediction(data_prediction_file_264, target)
     '''
     # print(f'-----------Start The 263-----------')
