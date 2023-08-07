@@ -29,7 +29,7 @@ def ann_model():
                '2019-09-01', '2019-10-01', '2019-11-01', '2019-12-01']
     
     # split_date = pd.Timestamp()
-    n = 252 #number of training data
+    n = 240 #number of training data
     cnt = 0
     for data in data_catagory:
         df_train = data[:][:n].copy()
@@ -43,17 +43,22 @@ def ann_model():
         plt.title(Industry_name[cnt])
         plt.show()
         
-        scaler = MinMaxScaler(feature_range=(-1, 1))
-        train_sc = scaler.fit_transform(df_train.values.reshape(-1,1))
-        test_sc = scaler.transform(df_test.values.reshape(-1,1))
-        print(f'train : {train_sc.shape}, test : {test_sc.shape}')
-        predict_mth = 12
+        # scaler = MinMaxScaler(feature_range=(-1, 1))
+        # train_sc = scaler.fit_transform(df_train.values.reshape(-1,1))
+        # test_sc = scaler.transform(df_test.values.reshape(-1,1))
         
-        X_train = train_sc[:-predict_mth]
-        y_train = train_sc[predict_mth:]
+
+
+        # print(f'train : {train_sc.shape}, test : {test_sc.shape}')
+        predict_mth = 24
         
-        X_test = test_sc[:-predict_mth]
-        y_test = test_sc[predict_mth:]
+
+        X_train = df_train[:-predict_mth]
+        y_train = df_train[predict_mth:]
+        
+        X_test = df_test[:-predict_mth]
+        y_test = df_test[predict_mth:]
+
         # print(target[-predict_mth:].index)
         
         print(f'x_train : {X_train.shape},x_test : {X_test.shape},y_train : {y_train.shape}, y_test : {y_test.shape}')
@@ -66,7 +71,7 @@ def ann_model():
         nn_model.summary()
         nn_model.compile(loss='mean_squared_error', optimizer='adam')
         early_stop = EarlyStopping(monitor='loss', patience=2, verbose=1)
-        history = nn_model.fit(X_train, y_train, epochs=100, batch_size=1, verbose=1, callbacks=[early_stop], shuffle=False)
+        history = nn_model.fit(X_train, y_train, epochs=200, batch_size=1, verbose=1, callbacks=[early_stop], shuffle=False)
         
         y_pred_test_nn = nn_model.predict(X_test)
         y_train_pred_nn = nn_model.predict(X_train)
@@ -84,7 +89,7 @@ def ann_model():
         plt.ylabel('Adj Close Scaled')
         plt.xticks(range(24), date_pre, rotation=60)
         plt.legend()
-        plt.show()
+        # plt.show()
 
         
         cnt += 1
