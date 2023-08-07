@@ -5,6 +5,7 @@ from sklearn.metrics import r2_score, classification_report
 from sklearn.metrics import mean_absolute_error as mse
 from sklearn.metrics import mean_absolute_error as mae
 from sklearn.metrics import mean_absolute_percentage_error as mape
+from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error
 import math
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -15,6 +16,7 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.stats.diagnostic import acorr_ljungbox as lb_test
 from statsmodels.tsa.stattools import adfuller 
 import pmdarima as pm
+
 plt.rcParams["font.sans-serif"]=["SimHei"] #设置字体
 plt.rcParams["axes.unicode_minus"]=False
 
@@ -132,13 +134,14 @@ def second_adf_test(data, orig):
 
 # Documents : 
 def call_ARIMA_model():
-    data_target, data_mine, data_ele_gas, data_water, data_tech, data_chemi, data_metal_mach= Call_329data()
-    cont_nm = [data_tech, data_metal_mach, data_chemi, data_ele_gas]
+    data_target, data_mine, data_ele_gas, data_water, data_tech, data_chemi, data_metal_mach, data_normal= Call_329data()
+    cont_nm = [data_mine, data_metal_mach, data_tech, data_chemi, data_normal, data_ele_gas, data_water]
     # cont_nm = [data_metal_mach, data_chemi]
-    Industry_name = ['資訊電子工業',"金屬機電工業", '化學工業', '電力及燃氣供應業']
+
+    Industry_name = ['礦業及土石採取業', '金屬機電工業', '資訊電子工業','化學工業','民生工業','電力及燃氣供應業', '用水供應業']
     # Industry_name = ["金屬機電工業", '化學工業']
     cnt = 0 
-    prediction_value_temp = pd.DataFrame(columns=[])
+    prediction_value_temp = pd.DataFrame(columns=[], index=['mae', 'mape', 'rmse', 'R2'])
     
     for i in cont_nm:
         data = 0
@@ -146,8 +149,8 @@ def call_ARIMA_model():
         data = i
         print(data.shape)
         print()
-        print(f'Model Training : {Industry_name[cnt]}')
-        n = 263 #number of training data
+        # print(f'Model Training : {Industry_name[cnt]}')
+        n = 264 #number of training data
         
         df_train = data[:][:n].copy()
         df_test = data[:][n:].copy()
@@ -180,10 +183,16 @@ def call_ARIMA_model():
         import matplotlib.pyplot as plt
         
         forecast_test_auto = auto_arima.predict(n_periods=len(df_test))
+        contain_ind = []
         # print(forecast_test_auto)
         
         # forcasting = inv_diff(forecast_test_auto, 1)
-        prediction_value_temp.insert(cnt, column=Industry_name[cnt], value=forecast_test_auto)
+        mae = mean_absolute_error(df_test, forecast_test_auto)
+        mape = mean_absolute_percentage_error(df_test, forecast_test_auto)
+        rmse = np.sqrt(mean_squared_error(df_test, forecast_test_auto))
+        r2_rec = r2_score(df_test, forecast_test_auto)
+        contain_ind = [mae, mape, rmse, r2_rec]
+        prediction_value_temp.insert(cnt, column=Industry_name[cnt], value=contain_ind )
         # print('-'*50)
         # print(forecast_test_auto)
         # print(prediction_value_temp)              
@@ -197,12 +206,9 @@ def call_ARIMA_model():
         plt.title(f'{Industry_name[cnt]} | 預測效果展示圖')
         # concat2 = pd.concat([target,forecast_test_auto],axis=1)
         
-        from sklearn.metrics import mean_absolute_error, mean_absolute_percentage_error, mean_squared_error
+        
 
-        mae = mean_absolute_error(df_test, forecast_test_auto)
-        mape = mean_absolute_percentage_error(df_test, forecast_test_auto)
-        rmse = np.sqrt(mean_squared_error(df_test, forecast_test_auto))
-        r2_rec = r2_score(df_test, forecast_test_auto)
+        
 
 
         print(f'mae - auto: {mae}')
@@ -214,7 +220,9 @@ def call_ARIMA_model():
         print('-'*100)
         cnt += 1
         # print(f'----------預測值：{prediction_value_temp}')
-    prediction_value_temp.to_csv('Prediction_value_263.csv')
+    print(prediction_value_temp)
+    a = input()
+    prediction_value_temp.to_csv('Season_SARIMA_Indicator_value.csv')
     return prediction_value_temp
     
 def Call_Model_SVR(predict_value, train_num):
@@ -398,8 +406,8 @@ def Call_329data():
     #data_329 = pd.DataFrame(pd.read_csv('..\..\OriginalValue(329)_copy.csv',encoding='cp950', index_col=0)) #mac
     # data_329 = pd.DataFrame(pd.read_csv('..\OriginalValue(329)_copy.csv',encoding='cp950', index_col=0)) 
     
-    # data_329 = pd.DataFrame(pd.read_csv('/Users/mariio/專題/論文專題/OriginalValue(329)_copy.csv',encoding='cp950', index_col=0))  #mac ver
-    data_329 = pd.DataFrame(pd.read_csv('..\OriginalValue(329)_copy.csv',encoding='cp950', index_col=0))   #windows ver
+    data_329 = pd.DataFrame(pd.read_csv('/Users/mariio/專題/論文專題/OriginalValue(329)_copy.csv',encoding='cp950', index_col=0))  #mac ver
+    # data_329 = pd.DataFrame(pd.read_csv('..\OriginalValue(329)_copy.csv',encoding='cp950', index_col=0))   #windows ver
     
     # print(data_329.head())
     data_329.index = pd.to_datetime(data_329.index)
@@ -422,20 +430,28 @@ def Call_329data():
     data_329_tech = data_329['資訊電子工業']
     data_329_chemi = data_329['化學工業']
     data_329_metal_mach = data_329['金屬機電工業']
-    return data_329_target, data_329_mine, data_329_ele_gas, data_329_water, data_329_tech, data_329_chemi, data_329_metal_mach
+    data_329_normal = data_329['民生工業']
+    return data_329_target, data_329_mine, data_329_ele_gas, data_329_water, data_329_tech, data_329_chemi, data_329_metal_mach, data_329_normal
 if __name__ == '__main__':
-    # data_prediction_value = call_ARIMA_model()
+    data_prediction_value = call_ARIMA_model()
+
+
+    ''' Prediction value part
     #data_prediction_file = pd.read_csv('/Users/mariio/專題/論文專題/AI_model_new/Prediction_value_undiff.csv', index_col=0) #mac ver
     data_prediction_file_264 = pd.read_csv('.\Prediction_value_264.csv', index_col=0) #windows ver
     data_prediction_file_264.index = pd.to_datetime(data_prediction_file_264.index)
 
     data_prediction_file_263 = pd.read_csv('.\Prediction_value_263.csv', index_col=0) #windows ver
     data_prediction_file_263.index = pd.to_datetime(data_prediction_file_263.index)
-    
-    # print(data_prediction_file)
+    '''
+
+
+
+
+    ''' SVR model part
     print(f'-----------Start The 264-----------')
     Call_Model_SVR(data_prediction_file_264, 264)
     
     # print(f'-----------Start The 263-----------')
     # Call_Model_SVR(data_prediction_file_263, 263)
-    
+    '''
