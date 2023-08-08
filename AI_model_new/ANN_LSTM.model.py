@@ -73,6 +73,7 @@ def ann_model():
         nn_model.add(Dense(24, input_dim=1, activation='relu'))
         # nn_model.add(Dense(12, input_dim=2, activation='PRelu'))
         nn_model.add(Dense(1))
+        
         nn_model.summary()
         nn_model.compile(loss='mean_squared_error', optimizer='adam')
         early_stop = EarlyStopping(monitor='loss', patience=2, verbose=1)
