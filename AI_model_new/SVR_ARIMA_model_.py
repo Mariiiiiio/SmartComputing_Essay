@@ -259,11 +259,22 @@ def call_ARIMA_model():
     prediction_value_temp.to_csv('Season_SARIMA_Indicator_value.csv')
     return prediction_value_temp
     
-def SVR_prediction(pred, target, weight_name):
+def SVR_prediction(pred, target, weight_name, time):
         reg1 = joblib.load(weight_name)
-        pred_result = reg1.predict(pred[:])
-        print(pred_result)
-        
+
+        print(pred)
+        if time == 0:
+            temp = np.array(pred)
+            temp = temp.reshape(-1, 1)
+            pred_result = reg1.predict(temp)
+        else:
+            pred_result = reg1.predict(pred[:])
+
+
+        print('-'*50)
+
+        a = input()
+
         mse_score = mse(target, pred_result)
         MAE_score = mae(target, pred_result)
         MAPE_score = mape(target, pred_result)
@@ -276,7 +287,7 @@ def SVR_prediction(pred, target, weight_name):
         pred_result = pred_result.reshape(-1,1)
         target = target.values.reshape(-1,1)
         draw_graph_SVR_Score(target, pred_result) 
-        result_svr_pred = pd.DataFrame(columns=['Predictions'], index=['MAE', 'MAPE', 'RMSE', 'R2'], data=cont)
+        result_svr_pred = pd.DataFrame(columns=[f'Predictions_set{time}'], index=['MAE', 'MAPE', 'RMSE', 'R2'], data=cont)
         print(result_svr_pred)
         result_svr_pred.to_csv(f'{weight_name}_result_svr_predictions.csv')
 def Call_Model_SVR(train_num):
@@ -284,13 +295,13 @@ def Call_Model_SVR(train_num):
     
     data_target, data_mine, data_ele_gas, data_water, data_tech, data_chemi, data_metal_mach, data_normal= Call_329data()
 
-    cont_nm1 = [data_tech]
-    cont_nm2 = [data_tech, data_metal_mach]
-    cont_nm3 = [data_tech, data_metal_mach, data_chemi]
+    cont_nm1 = [data_ele_gas]
+    cont_nm2 = [data_ele_gas, data_chemi]
+    cont_nm3 = [data_ele_gas, data_chemi, data_metal_mach]
 
-    cont_nm4 = [data_tech, data_metal_mach, data_chemi, data_ele_gas]
+
     # cont_nm = [data_metal_mach, data_chemi]
-    Industry_name = ['資訊電子工業',"金屬機電工業", '化學工業', '電力及燃氣供應業']
+    Industry_name = ['電力及燃氣供應業', '化學工業', "金屬機電工業"]
     
 
     
@@ -321,9 +332,11 @@ def Call_Model_SVR(train_num):
         
 
     '''
+    # data_col = cont_nm1 #for cont_nm1
+    
     data_col = pd.DataFrame(columns=[])
-    for i in range(len(cont_nm4)):
-        data_col.insert(i, column=Industry_name[i], value = cont_nm4[i])
+    for i in range(len(cont_nm3)):
+        data_col.insert(i, column=Industry_name[i], value = cont_nm3[i])
     
 
     
@@ -341,11 +354,21 @@ def Call_Model_SVR(train_num):
     print(data_target_svr_ori)
     '''
 
-    
-    '''Only from original data to use the svr model for prediction'''
+
+
+    '''  for cont_nm1
+    data_col_svr_ori = data_col[0][:n] # for cont_nm1 
+
+    data_col_svr_ori = np.array(data_col_svr_ori).reshape(-1, 1)
+    '''
+
+    '''for else set'''
     data_col_svr_ori = data_col.iloc[:][:n]
     data_target_svr_ori = data_target.iloc[:][:n]
-    
+
+
+    # print(data_target_svr_ori.shape)
+
     # data_col_svr_pre = data_col.iloc[:][n:]
     data_target_svr_pre = data_target.iloc[:][n:]
     
@@ -464,7 +487,7 @@ def Call_Model_SVR(train_num):
         
         draw_graph_SVR_Score(true_val, pred_val) 
         a = input()
-        joblib.dump(svr_model,'svr_model_set4.pkl')
+        joblib.dump(svr_model,'svr_set3.pkl')
         
 
     # print(classification_report(y_test, y_hat))
@@ -533,13 +556,15 @@ if __name__ == '__main__':
     ''' Prediction value part'''
     #data_prediction_file = pd.read_csv('/Users/mariio/專題/論文專題/AI_model_new/Prediction_value_undiff.csv', index_col=0) #mac ver
     
-    data_prediction_file_264 = pd.read_csv('./Prediction_value_264.csv', index_col=0) #mac ver
+    # data_prediction_file_264 = pd.read_csv('./Prediction_value_264.csv', index_col=0) #mac ver
+    data_prediction_file_264 = pd.read_csv('./Prediction_value_264copy.csv', index_col=0, encoding='cp950') #mac ver
+    
     # data_prediction_file_264 = pd.read_csv('.\Prediction_value_264.csv', index_col=0) #windows ver
     data_prediction_file_264.index = pd.to_datetime(data_prediction_file_264.index)
-
+    print(data_prediction_file_264)
     # data_prediction_file_263 = pd.read_csv('.\Prediction_value_263.csv', index_col=0) #windows ver
     # data_prediction_file_263.index = pd.to_datetime(data_prediction_file_263.index)
-    
+    a = input()
     n = 264
     data_target, data_mine, data_ele_gas, data_water, data_tech, data_chemi, data_metal_mach, data_normal= Call_329data()
     target = data_target.iloc[:][n:]
@@ -549,19 +574,22 @@ if __name__ == '__main__':
     # target = Call_Model_SVR(264)
 
 
-
-    weight_cont = ['svr_model_set1.pkl', 'svr_model_set2.pkl', 'svr_model_set3.pkl', 'svr_model_set4.pkl']
+    
+    weight_cont = ['svr_set1.pkl', 'svr_set2.pkl', 'svr_set3.pkl', 'svr_set4.pkl']
     for i in range(0, len(data_prediction_file_264.columns)):
         print(f'-----------Start The prediction part-Weight : {weight_cont[i]}-----------')
         if i == 0:
-            # print(data_prediction_file_264.iloc[:, i])    
-            SVR_prediction(data_prediction_file_264.iloc[:, i], n, weight_cont[i])
+            print(data_prediction_file_264.iloc[:, i])    
+            data_pred = data_prediction_file_264.iloc[:, i]
+            # data_pred = data_pred.values.reshape(-1, 1)
+            SVR_prediction(data_pred, target, weight_cont[i], i)
+
         else:
             # print(data_prediction_file_264.iloc[:, 0:i+1])
-            SVR_prediction(data_prediction_file_264.iloc[:, 0:i+1], n, weight_cont[i])
+            SVR_prediction(data_prediction_file_264.iloc[:, 0:i+1], target, weight_cont[i], i)
 
 
-
+    
     '''
     # print(f'-----------Start The 263-----------')
     # Call_Model_SVR(data_prediction_file_263, 263)
